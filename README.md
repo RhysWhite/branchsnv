@@ -16,7 +16,7 @@ membership, identifies the descendants of a selected branch, and produces
 reproducible results with SHA-256 provenance.
 
 ```text
-transposed NEXUS alignment ─┐
+transposed NEXUS alignment  ─┐
 Newick tree + rooting choice ├──> BRANCHSNV ───> results.tsv
 exact focal-clade tip list ──┘                  members.txt
                                                 report.json
