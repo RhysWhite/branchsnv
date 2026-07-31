@@ -124,14 +124,15 @@ def write_results(path: Path, results: tuple[SiteResult, ...]) -> None:
 
 
 def write_members(path: Path, branch: BranchRecord) -> None:
-    path.write_text("".join(f"{name}\n" for name in branch.descendant_tips), encoding="utf-8")
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write("".join(f"{name}\n" for name in branch.descendant_tips))
 
 
 def write_report(path: Path, report: dict[str, Any]) -> None:
-    path.write_text(
-        json.dumps(report, sort_keys=True, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(
+            json.dumps(report, sort_keys=True, indent=2, ensure_ascii=False) + "\n"
+        )
 
 
 def write_branches(path: Path, branches: list[BranchRecord]) -> None:

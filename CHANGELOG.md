@@ -7,6 +7,11 @@ and releases use semantic versioning.
 
 ## [Unreleased]
 
+### Fixed
+
+- Enforced LF line endings for branch-membership and JSON provenance outputs
+  on Windows, preserving byte-identical cross-platform results.
+
 ### Added
 
 - Strict parsing of transposed nucleotide NEXUS matrices.
