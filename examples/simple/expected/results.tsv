@@ -1,0 +1,3 @@
+site_id	reference	position	input_row	parent_states	child_states	possible_pairs	change	parsimony_status	fixed_within_clade	exclusive_to_clade	descendant_state	descendant_total	descendant_callable	descendant_state_count	outside_total	outside_callable	outside_same_state_count	parsimony_score	selection_reason
+ref_1	ref	1	1	G	A	G>A	G>A	unambiguous_change	true	true	A	2	2	2	3	3	0	1	both
+ref_6	ref	6	6	A|C|G	C	A>C|C>C|G>C	A>C|G>C	placement_ambiguous	true	true	C	2	2	2	3	3	0	2	fixed-exclusive

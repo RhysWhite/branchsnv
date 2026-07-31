@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "Please cite BRANCHSNV using this metadata."
+title: "BRANCHSNV"
+type: software
+authors:
+  - family-names: "White"
+    given-names: "Rhys T."
+version: 0.1.0a1
+license: MIT
+repository-code: "https://github.com/RhysWhite/branchsnv"
+abstract: >-
+  BRANCHSNV is a dependency-free Python command-line tool for identifying
+  fixed clade-associated nucleotide states and reconstructing single-nucleotide
+  substitutions on selected branches of rooted phylogenetic trees.
+keywords:
+  - phylogenetics
+  - bacterial genomics
+  - single-nucleotide variant
+  - NEXUS
+  - Newick

@@ -1,0 +1,46 @@
+configfile: "config.yaml"
+
+rule all:
+    input:
+        "results/branch_snvs.tsv",
+        "results/branch_members.txt",
+        "results/branchsnv_report.json",
+        "results/report.validated"
+
+rule branchsnv:
+    input:
+        alignment=config["alignment"],
+        tree=config["tree"],
+        tips=config["clade_tips"]
+    output:
+        results="results/branch_snvs.tsv",
+        members="results/branch_members.txt",
+        report="results/branchsnv_report.json"
+    params:
+        outgroup=config["outgroup"],
+        mode=config["mode"]
+    shell:
+        """
+        branchsnv find \
+          --alignment {input.alignment} \
+          --tree {input.tree} \
+          --outgroup {params.outgroup} \
+          --clade-tips {input.tips} \
+          --mode {params.mode} \
+          --output {output.results} \
+          --members-output {output.members} \
+          --report {output.report}
+        """
+
+rule validate_report:
+    input:
+        report="results/branchsnv_report.json"
+    output:
+        touch("results/report.validated")
+    shell:
+        """
+        python ../validate_report.py \
+          --report {input.report} \
+          --expected-descendants 2 \
+          --minimum-reported-sites 1
+        """

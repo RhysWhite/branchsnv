@@ -1,0 +1,18 @@
+include .editorconfig
+include .gitattributes
+include .gitignore
+include README.md
+include LICENSE
+include CHANGELOG.md
+include CITATION.cff
+include CONTRIBUTING.md
+include SECURITY.md
+include PUBLISHING.md
+include GITHUB_SETUP.md
+include VALIDATION_REPORT.md
+recursive-include docs *.md
+recursive-include schemas *.json *.md
+recursive-include examples *.py *.nex *.nwk *.txt *.tsv *.json *.yaml Snakefile
+recursive-include tests *.py *.nex *.nwk *.txt
+recursive-include validation *.md *.sh *.tsv *.txt
+recursive-include .github *.yml *.md

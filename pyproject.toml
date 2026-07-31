@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "branchsnv"
+version = "0.1.0a1"
+description = "Dependency-free identification of branch-associated SNVs from rooted phylogenies and transposed NEXUS matrices"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+  {name = "Rhys T. White"}
+]
+keywords = [
+  "phylogenetics",
+  "SNV",
+  "bacterial genomics",
+  "NEXUS",
+  "Newick",
+  "ancestral reconstruction"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Science/Research",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Scientific/Engineering :: Bio-Informatics"
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/RhysWhite/branchsnv"
+Repository = "https://github.com/RhysWhite/branchsnv"
+Issues = "https://github.com/RhysWhite/branchsnv/issues"
+
+[project.scripts]
+branchsnv = "branchsnv.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

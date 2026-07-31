@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install package
+        run: python -m pip install .
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+      - name: Reproduce bundled example
+        if: matrix.python-version == '3.14'
+        shell: bash
+        run: |
+          workdir=$(mktemp -d)
+          branchsnv find \
+            --alignment examples/simple/alignment.nex \
+            --tree examples/simple/tree.nwk \
+            --outgroup Outgroup \
+            --clade-tips examples/simple/clade_tips.txt \
+            --mode both \
+            --output "$workdir/results.tsv" \
+            --members-output "$workdir/members.txt" \
+            --report "$workdir/report.json"
+          diff -u examples/simple/expected/results.tsv "$workdir/results.tsv"
+          diff -u examples/simple/expected/members.txt "$workdir/members.txt"
+          diff -u examples/simple/expected/report.json "$workdir/report.json"
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Build distributions
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+      - name: Install wheel and inspect metadata
+        shell: bash
+        run: |
+          python -m pip install dist/*.whl
+          branchsnv --version
+          python - <<'PY'
+          import importlib.metadata
+          requirements = importlib.metadata.requires("branchsnv")
+          assert not requirements, f"Unexpected runtime dependencies: {requirements}"
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: branchsnv-distributions
+          path: dist/*

@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/RhysWhite/branchsnv/blob/main/schemas/branchsnv-report.schema.json",
+  "title": "BRANCHSNV provenance report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "tool",
+    "inputs",
+    "rooting",
+    "branch",
+    "parameters",
+    "results",
+    "outputs",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"const": "BRANCHSNV"},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alignment", "tree"],
+      "properties": {
+        "alignment": {"$ref": "#/$defs/alignmentInput"},
+        "tree": {"$ref": "#/$defs/treeInput"}
+      }
+    },
+    "rooting": {"type": "object"},
+    "branch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "branch_id",
+        "short_id",
+        "descendant_count",
+        "descendant_taxa_sha256",
+        "selection"
+      ],
+      "properties": {
+        "branch_id": {"type": "string", "pattern": "^b_[0-9a-f]{64}$"},
+        "short_id": {"type": "string", "pattern": "^b_[0-9a-f]{16}$"},
+        "descendant_count": {"type": "integer", "minimum": 1},
+        "descendant_taxa_sha256": {"$ref": "#/$defs/sha256"},
+        "selection": {"type": "object"}
+      }
+    },
+    "parameters": {"type": "object"},
+    "results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sites_examined",
+        "reported_sites",
+        "fixed_exclusive_sites",
+        "parsimony"
+      ],
+      "properties": {
+        "sites_examined": {"type": "integer", "minimum": 0},
+        "reported_sites": {"type": "integer", "minimum": 0},
+        "fixed_exclusive_sites": {"type": "integer", "minimum": 0},
+        "parsimony": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "unambiguous_change",
+            "change_state_ambiguous",
+            "placement_ambiguous",
+            "no_change"
+          ],
+          "properties": {
+            "unambiguous_change": {"type": "integer", "minimum": 0},
+            "change_state_ambiguous": {"type": "integer", "minimum": 0},
+            "placement_ambiguous": {"type": "integer", "minimum": 0},
+            "no_change": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["results_tsv", "branch_members"],
+      "properties": {
+        "results_tsv": {"$ref": "#/$defs/outputFile"},
+        "branch_members": {"$ref": "#/$defs/outputFile"}
+      }
+    },
+    "warnings": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "alignmentInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "sha256",
+        "ntax",
+        "nchar",
+        "format",
+        "gap_symbol",
+        "missing_symbol"
+      ],
+      "properties": {
+        "name": {"type": "string"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "ntax": {"type": "integer", "minimum": 1},
+        "nchar": {"type": "integer", "minimum": 1},
+        "format": {"const": "transposed_nexus"},
+        "gap_symbol": {"type": "string", "minLength": 1, "maxLength": 1},
+        "missing_symbol": {"type": "string", "minLength": 1, "maxLength": 1}
+      }
+    },
+    "treeInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "sha256", "tips", "format"],
+      "properties": {
+        "name": {"type": "string"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "tips": {"type": "integer", "minimum": 2},
+        "format": {"const": "newick"}
+      }
+    },
+    "outputFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "sha256"],
+      "properties": {
+        "name": {"type": "string"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

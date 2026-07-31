@@ -1,0 +1,5 @@
+alignment: ../simple/alignment.nex
+tree: ../simple/tree.nwk
+outgroup: Outgroup
+clade_tips: ../simple/clade_tips.txt
+mode: both

@@ -1,0 +1,72 @@
+{
+  "branch": {
+    "branch_id": "b_daee1cd25194ae952d046ad9b9c81d3c07dc5332440b58d6d7461b248be56712",
+    "descendant_count": 2,
+    "descendant_taxa_sha256": "daee1cd25194ae952d046ad9b9c81d3c07dc5332440b58d6d7461b248be56712",
+    "selection": {
+      "method": "exact_descendant_file",
+      "sha256": "daee1cd25194ae952d046ad9b9c81d3c07dc5332440b58d6d7461b248be56712",
+      "source": "clade_tips.txt"
+    },
+    "short_id": "b_daee1cd25194ae95"
+  },
+  "inputs": {
+    "alignment": {
+      "format": "transposed_nexus",
+      "gap_symbol": "-",
+      "missing_symbol": "?",
+      "name": "alignment.nex",
+      "nchar": 6,
+      "ntax": 5,
+      "sha256": "3bbefdad221dda7c40aa24c1a2b5ea879f665e8b3dddbed33af0aaec9890d19a"
+    },
+    "tree": {
+      "format": "newick",
+      "name": "tree.nwk",
+      "sha256": "d2065027593adf57ba6acb3a6bd384df0d69d971f4ee1e51e5da4d6ca96811f5",
+      "tips": 5
+    }
+  },
+  "outputs": {
+    "branch_members": {
+      "name": "members.txt",
+      "sha256": "daee1cd25194ae952d046ad9b9c81d3c07dc5332440b58d6d7461b248be56712"
+    },
+    "results_tsv": {
+      "name": "results.tsv",
+      "sha256": "0a255ee0deea2c5972f31fda6d4902fb8ef6a1110a92f95758dd1e3ba41003da"
+    }
+  },
+  "parameters": {
+    "fixed_exclusive_descendant_call_rate": 1.0,
+    "fixed_exclusive_outside_call_rate": 1.0,
+    "gap_treatment": "unknown_state",
+    "include_ambiguous_parsimony_sites": false,
+    "missing_treatment": "unknown_state",
+    "mode": "both",
+    "state_cost_model": "unordered_equal_cost"
+  },
+  "results": {
+    "fixed_exclusive_sites": 2,
+    "parsimony": {
+      "change_state_ambiguous": 0,
+      "no_change": 2,
+      "placement_ambiguous": 3,
+      "unambiguous_change": 1
+    },
+    "reported_sites": 2,
+    "sites_examined": 6
+  },
+  "rooting": {
+    "method": "outgroup",
+    "outgroup": [
+      "Outgroup"
+    ]
+  },
+  "schema_version": 1,
+  "tool": {
+    "name": "BRANCHSNV",
+    "version": "0.1.0a1"
+  },
+  "warnings": []
+}

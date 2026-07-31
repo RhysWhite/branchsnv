@@ -1,0 +1,32 @@
+name: Feature request
+description: Propose a narrowly scoped, testable extension.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Scientific or workflow problem
+      description: Describe the problem without prescribing an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: Proposed observable behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: How could the behaviour be independently validated?
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope checks
+      options:
+        - label: The request preserves exact taxon-name matching.
+        - label: The request can be implemented without silently guessing malformed input.
+        - label: Any proposed runtime dependency is justified.

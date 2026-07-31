@@ -1,0 +1,16 @@
+site_id	reference	position	input_row	parent_states	child_states	possible_pairs	change	parsimony_status	fixed_within_clade	exclusive_to_clade	descendant_state	descendant_total	descendant_callable	descendant_state_count	outside_total	outside_callable	outside_same_state_count	parsimony_score	selection_reason
+sa230905_barcode06_1_408	sa230905_barcode06_1	408	3	A	G	A>G	A>G	unambiguous_change	true	true	G	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_148318	sa230905_barcode06_1	148318	590	C	A	C>A	C>A	unambiguous_change	true	true	A	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_470837	sa230905_barcode06_1	470837	1854	A	C	A>C	A>C	unambiguous_change	true	true	C	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_738146	sa230905_barcode06_1	738146	2858	G	A	G>A	G>A	unambiguous_change	true	true	A	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_849992	sa230905_barcode06_1	849992	3072	C	T	C>T	C>T	unambiguous_change	true	true	T	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_1248573	sa230905_barcode06_1	1248573	4454	C	T	C>T	C>T	unambiguous_change	true	true	T	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_1413986	sa230905_barcode06_1	1413986	5130	G	A	G>A	G>A	unambiguous_change	true	true	A	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_1542411	sa230905_barcode06_1	1542411	5659	T	C	T>C	T>C	unambiguous_change	true	true	C	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_1557108	sa230905_barcode06_1	1557108	5699	A	C	A>C	A>C	unambiguous_change	true	true	C	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_1682364	sa230905_barcode06_1	1682364	6169	T	C	T>C	T>C	unambiguous_change	true	true	C	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_1891191	sa230905_barcode06_1	1891191	6991	T	A	T>A	T>A	unambiguous_change	true	true	A	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_2201553	sa230905_barcode06_1	2201553	8023	G	A	G>A	G>A	unambiguous_change	true	true	A	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_2556045	sa230905_barcode06_1	2556045	9445	G	T	G>T	G>T	unambiguous_change	true	true	T	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_2577011	sa230905_barcode06_1	2577011	9516	T	C	T>C	T>C	unambiguous_change	true	true	C	385	385	385	11	11	0	1	both
+sa230905_barcode06_1_2722031	sa230905_barcode06_1	2722031	10132	A	G	A>G	A>G	unambiguous_change	true	true	G	385	385	385	11	11	0	1	both

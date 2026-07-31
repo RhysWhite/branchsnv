@@ -1,0 +1,14 @@
+#NEXUS
+BEGIN DATA;
+    DIMENSIONS NTAX=5 NCHAR=6;
+    FORMAT SYMBOLS="ACGT" MISSING=? GAP=- TRANSPOSE;
+    TAXLABELS Outgroup A B C D;
+    MATRIX
+        ref_1 G A A G G
+        ref_2 G A A G A
+        ref_3 G A G G G
+        ref_4 C C C C C
+        ref_5 G ? A G G
+        ref_6 G C C A A
+    ;
+END;

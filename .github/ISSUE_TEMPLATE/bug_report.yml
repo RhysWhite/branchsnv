@@ -1,0 +1,47 @@
+name: Bug report
+description: Report incorrect behaviour or a reproducible failure.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Remove sensitive sample information before attaching files. Prefer a minimal reproducer.
+  - type: input
+    id: version
+    attributes:
+      label: BRANCHSNV version
+      placeholder: "branchsnv --version"
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Python version and operating system
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Exact command
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour and scientific rationale
+    validations:
+      required: true
+  - type: textarea
+    id: reproducer
+    attributes:
+      label: Minimal reproducer or input checksums
+    validations:
+      required: false
