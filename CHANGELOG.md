@@ -7,6 +7,9 @@ and releases use semantic versioning.
 
 ## [Unreleased]
 
+## [0.1.0a1] - 2026-07-31
+
+
 ### Fixed
 
 - Enforced LF line endings for branch-membership and JSON provenance outputs

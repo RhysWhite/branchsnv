@@ -4,39 +4,144 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to validate, for example v0.1.0a1"
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
   build:
+    name: Validate release distributions
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v7
+
       - uses: actions/setup-python@v7
         with:
           python-version: "3.14"
-      - name: Install and test
+
+      - name: Install source checkout and run tests
         run: |
           python -m pip install .
           python -m unittest discover -s tests -v
-      - name: Verify tag and package versions agree
+
+      - name: Verify tag and release metadata
         shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
         run: |
-          python - "$GITHUB_REF_NAME" <<'PY'
+          set -euo pipefail
+
+          python - "$RELEASE_TAG" <<'PY'
           import pathlib
           import re
           import sys
+
           tag = sys.argv[1]
-          init_text = pathlib.Path("src/branchsnv/__init__.py").read_text()
-          version = re.search(r'__version__ = "([^"]+)"', init_text).group(1)
-          assert tag == f"v{version}", f"Tag {tag} does not match version {version}"
+
+          pyproject = pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
+          citation = pathlib.Path("CITATION.cff").read_text(encoding="utf-8")
+          init_text = pathlib.Path("src/branchsnv/__init__.py").read_text(
+              encoding="utf-8"
+          )
+
+          pyproject_version = re.search(
+              r'^version\s*=\s*"([^"]+)"\s*$',
+              pyproject,
+              flags=re.MULTILINE,
+          ).group(1)
+
+          citation_version = re.search(
+              r'^version:\s*"?([^"\s]+)"?\s*$',
+              citation,
+              flags=re.MULTILINE,
+          ).group(1)
+
+          package_version = re.search(
+              r'__version__\s*=\s*"([^"]+)"',
+              init_text,
+          ).group(1)
+
+          versions = {
+              pyproject_version,
+              citation_version,
+              package_version,
+          }
+
+          assert len(versions) == 1, (
+              "Release metadata versions disagree: "
+              f"pyproject={pyproject_version}, "
+              f"citation={citation_version}, "
+              f"package={package_version}"
+          )
+
+          expected_tag = f"v{package_version}"
+          assert tag == expected_tag, (
+              f"Tag {tag!r} does not match expected tag {expected_tag!r}"
+          )
+
+          changelog = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
+          assert f"## [{package_version}]" in changelog, (
+              f"CHANGELOG.md has no release section for {package_version}"
+          )
+
+          print(f"Release metadata validated for {tag}.")
           PY
-      - name: Build
+
+      - name: Build and inspect distributions
         run: |
-          python -m pip install --upgrade build
+          python -m pip install --upgrade build twine
           python -m build
+          python -m twine check dist/*
+
+      - name: Install and validate wheel
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          env_dir="$RUNNER_TEMP/branchsnv-wheel"
+          python -m venv "$env_dir"
+
+          "$env_dir/bin/python" -m pip install dist/*.whl
+          "$env_dir/bin/branchsnv" --version
+          "$env_dir/bin/python" scripts/validate_installed_package.py
+          "$env_dir/bin/python" -m pip check
+
+      - name: Install and validate source distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          env_dir="$RUNNER_TEMP/branchsnv-sdist"
+          python -m venv "$env_dir"
+
+          "$env_dir/bin/python" -m pip install dist/*.tar.gz
+          "$env_dir/bin/branchsnv" --version
+          "$env_dir/bin/python" scripts/validate_installed_package.py
+          "$env_dir/bin/python" -m pip check
+
+      - name: Stage release documentation
+        run: |
+          cp VALIDATION_REPORT.md dist/
+          cp CITATION.cff dist/
+          cp LICENSE dist/
+
+      - name: Generate SHA-256 checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
       - uses: actions/upload-artifact@v7
         with:
-          name: release-distributions
+          name: branchsnv-${{ github.ref_name }}-release-files
           path: dist/*
+          if-no-files-found: error
