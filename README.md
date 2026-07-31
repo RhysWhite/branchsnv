@@ -8,8 +8,7 @@
 ![Status: alpha](https://img.shields.io/badge/status-alpha-orange)
 
 **Identify nucleotide states that distinguish a clade and substitutions that
-reconstruct to a selected phylogenetic branch — without manual spreadsheet
-comparison.**
+reconstruct to a selected phylogenetic branch — without manual comparison.**
 
 BRANCHSNV is a dependency-free Python command-line tool for rooted bacterial
 phylogenies and transposed NEXUS SNV matrices. It validates exact taxon
