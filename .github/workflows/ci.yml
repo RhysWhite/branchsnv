@@ -66,6 +66,7 @@ jobs:
           diff -u examples/simple/expected/report.json "$workdir/report.json"
 
   build:
+    name: build and validate distributions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -74,22 +75,35 @@ jobs:
         with:
           python-version: "3.14"
 
-      - name: Build distributions
+      - name: Build and inspect distributions
         run: |
-          python -m pip install --upgrade build
+          python -m pip install --upgrade build twine
           python -m build
+          python -m twine check dist/*
 
-      - name: Install wheel and inspect metadata
+      - name: Install and validate wheel
         shell: bash
         run: |
-          python -m pip install dist/*.whl
-          branchsnv --version
-          python - <<'PY'
-          import importlib.metadata
+          set -euo pipefail
+          env_dir="$RUNNER_TEMP/branchsnv-wheel"
+          rm -rf "$env_dir"
+          python -m venv "$env_dir"
+          "$env_dir/bin/python" -m pip install dist/*.whl
+          "$env_dir/bin/branchsnv" --version
+          "$env_dir/bin/python" scripts/validate_installed_package.py
+          "$env_dir/bin/python" -m pip check
 
-          requirements = importlib.metadata.requires("branchsnv")
-          assert not requirements, f"Unexpected runtime dependencies: {requirements}"
-          PY
+      - name: Install and validate source distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          env_dir="$RUNNER_TEMP/branchsnv-sdist"
+          rm -rf "$env_dir"
+          python -m venv "$env_dir"
+          "$env_dir/bin/python" -m pip install dist/*.tar.gz
+          "$env_dir/bin/branchsnv" --version
+          "$env_dir/bin/python" scripts/validate_installed_package.py
+          "$env_dir/bin/python" -m pip check
 
       - uses: actions/upload-artifact@v7
         with:
