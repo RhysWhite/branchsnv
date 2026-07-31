@@ -64,6 +64,42 @@ class CliTests(unittest.TestCase):
                 )
             self.assertEqual(outputs[0], outputs[1])
 
+    def test_text_outputs_use_lf_line_endings(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            results = root / "results.tsv"
+            members = root / "members.txt"
+            report = root / "report.json"
+
+            code = main(
+                [
+                    "find",
+                    "--alignment",
+                    str(FIXTURES / "simple.nex"),
+                    "--tree",
+                    str(FIXTURES / "simple.nwk"),
+                    "--outgroup",
+                    "Outgroup",
+                    "--clade-tips",
+                    str(FIXTURES / "ab_tips.txt"),
+                    "--mode",
+                    "both",
+                    "--output",
+                    str(results),
+                    "--members-output",
+                    str(members),
+                    "--report",
+                    str(report),
+                ]
+            )
+
+            self.assertEqual(code, 0)
+
+            for output in (results, members, report):
+                data = output.read_bytes()
+                self.assertNotIn(b"\r\n", data)
+                self.assertTrue(data.endswith(b"\n"))
+
     def test_refuses_to_overwrite_without_force(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "branches.tsv"
