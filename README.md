@@ -1,92 +1,67 @@
 # BRANCHSNV
 
-**Reproducible identification of branch-associated single-nucleotide variants
-from rooted phylogenies and transposed NEXUS matrices.**
+[![CI](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml/badge.svg)](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml/badge.svg)](https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml)
+![Python 3.10–3.14](https://img.shields.io/badge/Python-3.10%E2%80%933.14-3776AB?logo=python&logoColor=white)
+![Runtime dependencies](https://img.shields.io/badge/runtime%20dependencies-0-2ea44f)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Status: alpha](https://img.shields.io/badge/status-alpha-orange)
 
-BRANCHSNV replaces manual spreadsheet comparison of phylogenetic SNV matrices.
-It matches taxa by exact name, identifies the descendants of a selected branch,
-and reports either:
+**Identify nucleotide states that distinguish a clade and substitutions that
+reconstruct to a selected phylogenetic branch — without manual spreadsheet
+comparison.**
 
-- **fixed-exclusive markers**: one unambiguous nucleotide is fixed in every
-  descendant, all taxa outside the clade are callable, and none carries that
-  nucleotide; or
-- **parsimony branch changes**: the parent and child states on the selected edge
-  are evaluated across every globally optimal equal-cost Sankoff
-  reconstruction.
+BRANCHSNV is a dependency-free Python command-line tool for rooted bacterial
+phylogenies and transposed NEXUS SNV matrices. It validates exact taxon
+membership, identifies the descendants of a selected branch, and produces
+reproducible results with SHA-256 provenance.
 
-BRANCHSNV is a Python command-line tool with **no runtime dependencies**.
+```text
+transposed NEXUS alignment ─┐
+Newick tree + rooting choice ├──> BRANCHSNV ───> results.tsv
+exact focal-clade tip list ──┘                  members.txt
+                                                report.json
+```
 
 > [!IMPORTANT]
-> BRANCHSNV analyses an existing alignment and tree. It does not call variants,
-> build or root a phylogeny, detect recombination, annotate genes, infer
-> functional effects, or establish that a substitution caused a phenotype.
+> BRANCHSNV starts **after** variant calling, alignment generation, phylogeny
+> inference, recombination filtering, and other upstream processing. It does
+> not call variants, build a tree, detect recombination, annotate genes, infer
+> functional effects, or establish causation.
 
-## Why BRANCHSNV?
+## What BRANCHSNV reports
 
-A spreadsheet workflow can identify useful clade markers, but it is vulnerable
-to column-order errors, incomplete clade membership, hidden missing calls, and
-unrecorded filtering decisions. BRANCHSNV makes those decisions explicit and
-produces deterministic results with SHA-256 provenance.
+| Mode | Question answered | Reporting rule |
+|---|---|---|
+| `fixed-exclusive` | Which nucleotide states are strict markers of this clade in the supplied dataset? | Every descendant has the same unambiguous base; every outside taxon is callable; no outside taxon has that base. |
+| `parsimony` | Which substitutions reconstruct to the selected branch? | Parent and child states are evaluated across **all** globally optimal equal-cost Sankoff reconstructions. |
+| `both` | Which sites meet either definition? | Reports the union and records the reason for each row. This is the default. |
 
-Taxon order in the NEXUS file does **not** need to match visual tip order in the
-tree. Matching is performed by exact taxon name.
+The definitions are deliberately separate. A perfect clade marker can have
+ambiguous placement on the incoming branch, while a reconstructed branch change
+can recur elsewhere and therefore not be exclusive.
 
 ## Installation
 
 BRANCHSNV requires Python 3.10 or later.
 
-From a cloned repository:
+Install the tagged alpha release from the repository:
 
 ```bash
 git clone https://github.com/RhysWhite/branchsnv.git
 cd branchsnv
+git checkout v0.1.0a1
 python -m pip install .
+branchsnv --version
 ```
 
-For development:
-
-```bash
-python -m pip install -e .
-python -m unittest discover -s tests -v
-```
+For development installation and contribution guidance, see
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Quick start
 
-Validate that the alignment and tree contain exactly the same taxa and that the
-requested outgroup defines one tree edge:
-
-```bash
-branchsnv validate \
-  --alignment alignment.nex \
-  --tree tree.nwk \
-  --outgroup Outgroup_isolate
-```
-
-List all branches and their deterministic identifiers:
-
-```bash
-branchsnv inspect \
-  --tree tree.nwk \
-  --outgroup Outgroup_isolate \
-  --output branches.tsv
-```
-
-Identify SNVs associated with a branch whose exact descendants are recorded in
-`clade_tips.txt`:
-
-```bash
-branchsnv find \
-  --alignment alignment.nex \
-  --tree tree.nwk \
-  --outgroup Outgroup_isolate \
-  --clade-tips clade_tips.txt \
-  --mode both \
-  --output branch_snvs.tsv \
-  --members-output branch_members.txt \
-  --report branchsnv_report.json
-```
-
-The bundled example can be run with:
+The bundled example contains five taxa, six sites, and a focal branch containing
+isolates `A` and `B`.
 
 ```bash
 branchsnv find \
@@ -95,221 +70,220 @@ branchsnv find \
   --outgroup Outgroup \
   --clade-tips examples/simple/clade_tips.txt \
   --mode both \
-  --output example_results.tsv \
-  --members-output example_members.txt \
-  --report example_report.json
+  --output results.tsv \
+  --members-output members.txt \
+  --report report.json
 ```
+
+BRANCHSNV reports:
+
+```text
+Selected b_daee1cd25194ae95 (2 descendants); reported 2 of 6 sites.
+```
+
+The full TSV contains the original site identifier, inferred parent and child
+states, all optimal state pairs, call counts, parsimony score, and selection
+reason. The example reduces to:
+
+| Site | Reconstructed change | Parsimony status | Fixed-exclusive | Reported because |
+|---|---:|---|---:|---|
+| `ref_1` | `G>A` | `unambiguous_change` | yes | `both` |
+| `ref_6` | ambiguous | `placement_ambiguous` | yes | `fixed-exclusive` |
+
+Committed expected outputs are available in
+[`examples/simple/expected/`](examples/simple/expected/).
+
+## Running BRANCHSNV on your data
+
+### 1. Prepare three inputs
+
+You need:
+
+1. a transposed nucleotide NEXUS matrix, with sites as rows and taxa as columns;
+2. a Newick tree containing exactly the same taxon names; and
+3. the exact tip names descending from the branch of interest.
+
+The NEXUS taxon order does **not** need to match the visual tip order in the
+tree. BRANCHSNV matches taxa by exact name.
+
+Example focal-clade file:
+
+```text
+isolate_A
+isolate_B
+isolate_C
+```
+
+### 2. Validate the alignment, tree, and root
+
+For a single outgroup tip:
+
+```bash
+branchsnv validate \
+  --alignment alignment.nex \
+  --tree tree.nwk \
+  --outgroup Outgroup_isolate
+```
+
+For an outgroup containing several genomes:
+
+```bash
+branchsnv validate \
+  --alignment alignment.nex \
+  --tree tree.nwk \
+  --outgroup outgroup_1 outgroup_2 outgroup_3 outgroup_4
+```
+
+A one-name-per-line outgroup file can instead be supplied with
+`--outgroup-file outgroup_tips.txt`.
+
+### 3. Find branch-associated SNVs
+
+```bash
+branchsnv find \
+  --alignment alignment.nex \
+  --tree tree.nwk \
+  --outgroup-file outgroup_tips.txt \
+  --clade-tips clade_tips.txt \
+  --mode both \
+  --output branch_snvs.tsv \
+  --members-output branch_members.txt \
+  --report branchsnv_report.json
+```
+
+BRANCHSNV stops if the requested tips do not form exactly one rooted clade, if
+tree and alignment taxa differ, or if unsupported input is encountered.
 
 ## Selecting a branch
 
-### Exact descendant list — recommended for publication analyses
+| Method | Option | Best use | Important detail |
+|---|---|---|---|
+| Exact descendants | `--clade-tips clade_tips.txt` | Publication and permanent analyses | Recommended. The file must equal the complete descendant set of one branch. |
+| MRCA anchors | `--mrca isolate_A isolate_B` | Exploration | The selected MRCA may contain additional descendants. Inspect `members.txt`. |
+| Deterministic branch ID | `--branch-id b_daee1cd25194ae95` | Repeating an inspected selection | Generate IDs first with `branchsnv inspect`. Full IDs or unique prefixes are accepted. |
+
+To list every branch and its deterministic identifier:
 
 ```bash
---clade-tips clade_tips.txt
+branchsnv inspect \
+  --tree tree.nwk \
+  --outgroup-file outgroup_tips.txt \
+  --output branches.tsv
 ```
 
-The file contains one exact tip name per line. BRANCHSNV stops if those tips do
-not form exactly one rooted clade. The resulting sorted membership list and its
-SHA-256 digest are recorded.
+A branch ID is derived from the SHA-256 hash of its sorted exact descendant-tip
+names. It is unaffected by sibling order or branch lengths, but intentionally
+changes when rooting or descendant membership changes.
 
-### MRCA of selected tips
-
-```bash
---mrca isolate_A isolate_B isolate_C
-```
-
-This selects the incoming branch of their most recent common ancestor. The
-output membership file shows every descendant actually selected. An MRCA may
-contain additional tips beyond those named on the command line.
-
-### Deterministic branch identifier
-
-```bash
---branch-id b_daee1cd25194ae95
-```
-
-Run `branchsnv inspect` first. A branch ID is derived from the SHA-256 hash of
-the sorted exact descendant-tip names. It is unaffected by Newick sibling order
-or branch lengths. A full ID or unambiguous prefix may be supplied.
+See [`docs/branch-selection.md`](docs/branch-selection.md) for details.
 
 ## Rooting is explicit
 
-BRANCHSNV never silently decides that a tree is correctly rooted. Every command
-that interprets branches requires one of:
+Every command that interprets branches requires one of:
 
-```bash
---outgroup isolate_name
+```text
+--outgroup TIP [TIP ...]
 --outgroup-file outgroup_tips.txt
 --accept-existing-root
 ```
 
-`--outgroup` and `--outgroup-file` verify that the requested taxa are
-monophyletic on one edge and root there. `--accept-existing-root` means that the
-user accepts the root encoded by the Newick topology.
-
-Branch direction, parent state, child state, and the meaning of a reported
-change depend on the root.
-
-## Analysis modes
-
-### `--mode fixed-exclusive`
-
-A site is reported only when:
-
-1. every descendant is an unambiguous `A`, `C`, `G`, or `T`;
-2. every descendant has the same state;
-3. every outside taxon is also unambiguously callable; and
-4. no outside taxon has the descendant state.
-
-This is the strict, reproducible equivalent of the conservative spreadsheet
-filtering approach.
-
-### `--mode parsimony`
-
-BRANCHSNV uses an unordered equal-cost Sankoff model over `A`, `C`, `G`, and
-`T`. Missing, gap, and IUPAC ambiguity symbols are represented as sets of
-possible states. It retains **all** globally most-parsimonious reconstructions
-and classifies the selected edge as:
-
-- `unambiguous_change`: one parent-child pair is possible and the states differ;
-- `change_state_ambiguous`: every optimal reconstruction changes on the edge,
-  but more than one nucleotide transition is possible;
-- `placement_ambiguous`: some optimal reconstructions change on the edge and
-  others do not;
-- `no_change`: no optimal reconstruction changes on the edge.
-
-By default, only `unambiguous_change` sites are reported. Add
-`--include-ambiguous` to include the two ambiguous categories.
-
-### `--mode both` — default
-
-The output is the union of strict fixed-exclusive markers and selected
-parsimony results. `selection_reason` records `fixed-exclusive`, `parsimony`, or
-`both` for every row.
-
-The two definitions are intentionally separate. A nucleotide may be a perfect
-clade marker while its placement on the incoming branch remains ambiguous under
-parsimony. Conversely, a parsimoniously reconstructed branch change may recur
-outside the clade and therefore not be exclusive.
+BRANCHSNV never silently assumes that the encoded Newick root is biologically
+appropriate. Branch direction and reconstructed parent-to-child changes depend
+on the chosen root.
 
 ## Output files
 
-### Results TSV
+| File | Purpose |
+|---|---|
+| `results.tsv` | Reported sites, ancestral-state results, call counts, parsimony scores, and selection reasons. |
+| `members.txt` | Sorted, one-name-per-line record of every descendant on the selected branch. |
+| `report.json` | Deterministic provenance: versions, input dimensions, rooting and selection methods, parameters, counts, and SHA-256 checksums. |
 
-Important columns include:
-
-- `site_id`, `reference`, `position`, and `input_row`;
-- `parent_states`, `child_states`, and every optimal `possible_pairs` value;
-- `change` and `parsimony_status`;
-- `fixed_within_clade` and `exclusive_to_clade`;
-- descendant and outside call counts;
-- `outside_same_state_count`;
-- whole-tree `parsimony_score`; and
-- `selection_reason`.
-
-Coordinates are parsed only when the site identifier ends in `_<integer>`.
-The original site identifier is always retained.
-
-### Branch-membership file
-
-A sorted, one-name-per-line record of every descendant of the selected branch.
-This file is itself hashed and referenced in the JSON report.
-
-### Provenance JSON
-
-The deterministic report records:
-
-- BRANCHSNV version;
-- input names, dimensions, and SHA-256 checksums;
-- rooting method and outgroup;
-- branch identifier, descendant count, and membership checksum;
-- branch-selection method;
-- state and call-rate rules;
-- result counts; and
-- output checksums.
-
-The report intentionally omits execution timestamps and absolute paths so that
-identical files and parameters generate identical outputs in different working
-directories.
-
-Report schema version 1 is documented in
+The JSON report omits timestamps and absolute paths so that identical input
+files and parameters produce identical output bytes in different working
+directories. Its schema is documented in
 [`schemas/branchsnv-report.schema.json`](schemas/branchsnv-report.schema.json).
 
-## Supported input subset
+## Parsimony classifications
 
-The current BRANCHSNV alpha supports:
+BRANCHSNV uses unordered equal-cost Sankoff parsimony over `A`, `C`, `G`, and
+`T`, retaining every globally optimal reconstruction.
 
-- one rooted Newick tree with unique exact tip names;
-- single-quoted Newick labels, comments, internal labels, branch lengths, and
-  multifurcations;
-- one `DATA` or `CHARACTERS` NEXUS block;
-- `DIMENSIONS NTAX=... NCHAR=...`;
-- `FORMAT ... TRANSPOSE` nucleotide matrices;
-- one `TAXLABELS` statement;
-- one site per physical matrix row;
-- separated single-character states or one compact state string;
-- `A`, `C`, `G`, `T`, standard IUPAC ambiguity codes, the declared missing
-  symbol, and the declared gap symbol.
+| Status | Interpretation |
+|---|---|
+| `unambiguous_change` | One parent-child pair is possible and the states differ. |
+| `change_state_ambiguous` | Every optimum changes on the edge, but the exact transition is not unique. |
+| `placement_ambiguous` | Some optima change on the edge and others do not. |
+| `no_change` | No optimum changes on the selected edge. |
 
-Interleaved matrices, non-transposed matrices, repeated blocks, indel
-reconstruction, structural variants, and general-purpose NEXUS dialects are
-outside the current scope. Unsupported input is rejected rather than guessed.
+By default, parsimony mode reports only `unambiguous_change`. Add
+`--include-ambiguous` to include the two ambiguous categories.
 
-## Interpretation
+## Input scope
 
-A reported result is conditional on:
+The current alpha supports one transposed nucleotide `DATA` or `CHARACTERS`
+NEXUS block and one Newick tree with unique exact tip names. It supports quoted
+labels, comments, branch lengths, multifurcations, standard IUPAC ambiguity
+codes, and declared missing and gap symbols.
 
-- the supplied alignment;
-- all upstream variant and site filtering;
-- the supplied tree topology;
-- the supplied root;
-- the selected descendants; and
-- the chosen state model.
+It deliberately does not support non-transposed or interleaved matrices,
+multiple data blocks, indel reconstruction, structural variants, fuzzy taxon
+matching, or general-purpose NEXUS dialects. Unsupported content is rejected
+rather than guessed.
 
-“Branch-associated” does not mean causal, adaptive, unique in all future
-sampling, or free from recombination unless those properties were established
-upstream. See [`docs/interpretation.md`](docs/interpretation.md).
+See [`docs/input-formats.md`](docs/input-formats.md) for the complete accepted
+subset.
 
-## Validation
+## Interpretation and limitations
 
-The repository includes:
+Every result is conditional on the supplied alignment, upstream filters, tree
+topology, root, selected descendants, and state model.
 
-- hand-calculated parser and topology fixtures;
-- exhaustive enumeration of internal states as an independent oracle for
-  generated small-tree examples;
-- tests for missing data, IUPAC ambiguity, multifurcations, parallel patterns,
-  non-monophyletic selections, and taxon mismatch;
-- permanent scenarios designed to detect wrong-side selection, majority-state
-  shortcuts, arbitrary tie resolution, and treatment of gaps as a fifth base;
-- deterministic-output checks; and
-- an AK3 working-dataset validation recipe with fixed input hashes and expected
-  outputs.
+“Branch-associated” does not mean causal, adaptive, free from recombination, or
+unique under future sampling. BRANCHSNV also does not use branch lengths,
+unequal substitution rates, or nucleotide frequencies in ancestral
+reconstruction.
 
-Run all tests with:
+See [`docs/interpretation.md`](docs/interpretation.md) for reporting language and
+interpretive cautions.
+
+## Validation and reproducibility
+
+BRANCHSNV uses layered validation rather than relying on a few successful
+example files. The repository includes:
+
+- strict parser and topology fixtures;
+- comparison with an independent exhaustive internal-state oracle on generated
+  small-tree patterns;
+- permanent fault-regression scenarios designed to catch plausible incorrect
+  implementations;
+- deterministic-output and cross-platform line-ending checks;
+- clean wheel and source-distribution validation; and
+- a working-data validation recipe for two branches in a published MRSA AK3
+  dataset.
+
+Run the test suite after development installation:
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-See [`docs/validation.md`](docs/validation.md),
-[`validation/ak3/README.md`](validation/ak3/README.md), and the
-[`VALIDATION_REPORT.md`](VALIDATION_REPORT.md) produced for this alpha.
+See [`VALIDATION_REPORT.md`](VALIDATION_REPORT.md),
+[`docs/validation.md`](docs/validation.md), and
+[`validation/ak3/README.md`](validation/ak3/README.md).
 
-## Scope and limitations
+## Documentation
 
-The current BRANCHSNV alpha does not:
-
-- infer or optimize a phylogenetic tree;
-- infer an outgroup;
-- use branch lengths in ancestral reconstruction;
-- model unequal substitution rates or nucleotide frequencies;
-- distinguish mutation from recombination;
-- reconstruct insertions or deletions;
-- annotate coding consequences;
-- accept partial or fuzzy taxon-name matches; or
-- silently discard taxa or malformed sites.
-
-These are deliberate boundaries, not missing documentation.
+| Topic | Document |
+|---|---|
+| Accepted NEXUS and Newick syntax | [`docs/input-formats.md`](docs/input-formats.md) |
+| Exact descendants, MRCA, and branch IDs | [`docs/branch-selection.md`](docs/branch-selection.md) |
+| Fixed-exclusive and Sankoff algorithms | [`docs/algorithm.md`](docs/algorithm.md) |
+| Scientific interpretation | [`docs/interpretation.md`](docs/interpretation.md) |
+| Validation design | [`docs/validation.md`](docs/validation.md) |
+| Shell and Snakemake integration | [`docs/workflow-integration.md`](docs/workflow-integration.md) |
+| Contributing | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
+| Release history | [`CHANGELOG.md`](CHANGELOG.md) |
 
 ## Funding and affiliation
 
