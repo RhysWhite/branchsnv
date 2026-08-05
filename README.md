@@ -281,6 +281,7 @@ See [`VALIDATION_REPORT.md`](VALIDATION_REPORT.md),
 | Scientific interpretation | [`docs/interpretation.md`](docs/interpretation.md) |
 | Validation design | [`docs/validation.md`](docs/validation.md) |
 | Shell and Snakemake integration | [`docs/workflow-integration.md`](docs/workflow-integration.md) |
+| Annotated source-code walkthrough (`v0.1.0a1`) | [`docs/code-walkthrough/v0.1.0a1/README.md`](docs/code-walkthrough/v0.1.0a1/README.md) |
 | Contributing | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | Release history | [`CHANGELOG.md`](CHANGELOG.md) |
 
