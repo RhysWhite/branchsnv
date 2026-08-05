@@ -1,3 +1,11 @@
+<p align="center">
+  <img
+    src="assets/BRANCHSNV_logo.png"
+    alt="BRANCHSNV — Exact branch-level SNV interrogation from a rooted tree and alignment"
+    width="1000"
+  >
+</p>
+
 # BRANCHSNV
 
 [![CI](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml/badge.svg)](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml)
