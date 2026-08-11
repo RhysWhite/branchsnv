@@ -81,7 +81,10 @@ def _root_tree(tree: Tree, args: argparse.Namespace) -> tuple[Tree, dict[str, ob
         method = "outgroup_file"
         source = args.outgroup_file.name
     else:
-        names = set(args.outgroup)
+        inline_names = args.outgroup or []
+        if len(set(inline_names)) != len(inline_names):
+            raise ValidationError("--outgroup contains duplicate tip names.")
+        names = set(inline_names)
         method = "outgroup"
         source = None
     rooted = reroot_on_outgroup(tree, names)

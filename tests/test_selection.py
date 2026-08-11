@@ -33,6 +33,18 @@ class SelectionTests(unittest.TestCase):
         resolved = resolve_branch_id(branch_records(self.tree), branch.short_id)
         self.assertIs(resolved.node, branch.node)
 
+    def test_branch_id_rejects_unknown_identifier(self) -> None:
+        with self.assertRaisesRegex(SelectionError, "No branch matches identifier"):
+            resolve_branch_id(branch_records(self.tree), "b_not_a_real_branch")
+
+    def test_branch_id_rejects_ambiguous_prefix(self) -> None:
+        with self.assertRaisesRegex(SelectionError, "is ambiguous"):
+            resolve_branch_id(branch_records(self.tree), "b_")
+
+    def test_mrca_rejects_root(self) -> None:
+        with self.assertRaisesRegex(SelectionError, "MRCA is the root"):
+            select_mrca_branch(self.tree, {"O", "A"})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -25,6 +25,49 @@ class CliTests(unittest.TestCase):
         )
         self.assertEqual(code, 0)
 
+    def test_rejects_duplicate_inline_outgroup_names(self) -> None:
+        code = main(
+            [
+                "validate",
+                "--alignment",
+                str(FIXTURES / "simple.nex"),
+                "--tree",
+                str(FIXTURES / "simple.nwk"),
+                "--outgroup",
+                "Outgroup",
+                "Outgroup",
+            ]
+        )
+        self.assertEqual(code, 2)
+
+    def test_rejects_duplicate_inline_mrca_names(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            code = main(
+                [
+                    "find",
+                    "--alignment",
+                    str(FIXTURES / "simple.nex"),
+                    "--tree",
+                    str(FIXTURES / "simple.nwk"),
+                    "--outgroup",
+                    "Outgroup",
+                    "--mrca",
+                    "A",
+                    "A",
+                    "--output",
+                    str(root / "results.tsv"),
+                    "--members-output",
+                    str(root / "members.txt"),
+                    "--report",
+                    str(root / "report.json"),
+                ]
+            )
+            self.assertEqual(code, 2)
+            self.assertFalse((root / "results.tsv").exists())
+            self.assertFalse((root / "members.txt").exists())
+            self.assertFalse((root / "report.json").exists())
+
     def test_find_outputs_are_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as first_directory, tempfile.TemporaryDirectory() as second_directory:
             outputs = []
