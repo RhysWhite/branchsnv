@@ -11,7 +11,7 @@
 ![Python 3.10–3.14](https://img.shields.io/badge/Python-3.10%E2%80%933.14-3776AB?logo=python&logoColor=white)
 ![Runtime dependencies](https://img.shields.io/badge/runtime%20dependencies-0-2ea44f)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![Status: alpha](https://img.shields.io/badge/status-alpha-orange)
+![Status: beta](https://img.shields.io/badge/status-beta-blue)
 
 **Identify nucleotide states that distinguish a clade and substitutions that
 reconstruct to a selected phylogenetic branch — without conflating the two.**
@@ -52,12 +52,12 @@ can recur elsewhere and therefore not be clade-exclusive.
 
 BRANCHSNV requires Python 3.10 or later.
 
-Install the tagged alpha release from the repository:
+Install the tagged release from the repository:
 
 ```bash
 git clone https://github.com/RhysWhite/branchsnv.git
 cd branchsnv
-git checkout v0.1.0a1
+git checkout v0.1.0
 python -m pip install .
 branchsnv --version
 ```

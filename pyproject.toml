@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "branchsnv"
-version = "0.1.0a1"
+version = "0.1.0"
 description = "Dependency-free identification of branch-associated SNVs from rooted phylogenies and transposed NEXUS matrices"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -21,7 +21,7 @@ keywords = [
   "ancestral reconstruction"
 ]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 4 - Beta",
   "Environment :: Console",
   "Intended Audience :: Science/Research",
   "Natural Language :: English",
