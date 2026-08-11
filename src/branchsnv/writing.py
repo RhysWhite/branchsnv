@@ -63,13 +63,26 @@ class AtomicOutputSet:
         for target in self.targets:
             if target.exists() and not self.force:
                 raise ValidationError(f"Output already exists: {target}. Use --force to replace it.")
-            target.parent.mkdir(parents=True, exist_ok=True)
-            descriptor, name = tempfile.mkstemp(
-                prefix=f".{target.name}.", suffix=".tmp", dir=target.parent
-            )
-            os.close(descriptor)
-            self.temporary[target] = Path(name)
+        try:
+            for target in self.targets:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                descriptor, name = tempfile.mkstemp(
+                    prefix=f".{target.name}.", suffix=".tmp", dir=target.parent
+                )
+                self.temporary[target] = Path(name)
+                os.close(descriptor)
+        except Exception:
+            self._cleanup_temporary()
+            raise
         return self
+
+    def _cleanup_temporary(self) -> None:
+        for path in self.temporary.values():
+            try:
+                path.unlink()
+            except FileNotFoundError:
+                pass
+        self.temporary.clear()
 
     def staged_path(self, target: Path) -> Path:
         return self.temporary[target]
@@ -80,11 +93,7 @@ class AtomicOutputSet:
         self.temporary.clear()
 
     def __exit__(self, exc_type, exc, traceback) -> None:  # type: ignore[no-untyped-def]
-        for path in self.temporary.values():
-            try:
-                path.unlink()
-            except FileNotFoundError:
-                pass
+        self._cleanup_temporary()
 
 
 def write_results(path: Path, results: tuple[SiteResult, ...]) -> None:
