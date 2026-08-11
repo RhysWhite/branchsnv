@@ -1,67 +1,169 @@
 # Validation strategy
 
-BRANCHSNV validation is layered so that correctness does not depend on one set
-of example outputs.
+BRANCHSNV uses layered validation so that confidence in the software does not
+depend on one implementation, one dataset, or one successful example.
 
-## Parser validation
+Production testing and publication validation are deliberately separated. The
+production repository contains development-facing tests and regression checks.
+The independent publication-validation framework is maintained at
+[RhysWhite/branchsnv-validation](https://github.com/RhysWhite/branchsnv-validation)
+and records the analyses supporting the manuscript-level validation claims.
 
-Permanent tests cover valid and malformed examples for:
+## Production test suite
 
-- transposed NEXUS dimensions and row lengths;
-- duplicate taxa and site identifiers;
-- compact and separated state strings;
-- nested comments and quoted labels;
-- Newick comments, lengths, multifurcations, and duplicate tips; and
-- tree/alignment taxon mismatch.
+The current production suite contains 42 standard-library tests. GitHub Actions
+runs the suite on Python 3.10, 3.11, 3.12, 3.13, and 3.14 on Linux, with
+additional Python 3.14 jobs on macOS and Windows.
 
-## Independent exhaustive oracle
+The production tests cover:
 
-For small trees, the test suite enumerates every possible internal-node
-assignment over A/C/G/T. It independently calculates the global minimum score
-and all possible parent-child state pairs on the focal edge.
+- strict transposed NEXUS parsing and malformed-input rejection;
+- Newick parsing, explicit rerooting, multifurcations, and duplicate-tip
+  rejection;
+- exact branch selection, MRCA selection, deterministic branch IDs, and
+  non-monophyly rejection;
+- exact tree/alignment taxon-name correspondence;
+- strict fixed-exclusive marker rules, including descendant and outside-taxon
+  callability;
+- focal-edge equal-cost Sankoff reconstruction;
+- generated comparisons against an independent exhaustive internal-state
+  oracle;
+- permanent fault-regression examples;
+- deterministic output across distinct `PYTHONHASHSEED` values;
+- LF line-ending consistency;
+- overwrite and input/output collision protection;
+- provenance checksum and count consistency;
+- report-schema integrity; and
+- release-metadata consistency.
 
-The production dynamic-programming implementation is compared against this
-oracle for 250 deterministic generated patterns containing unambiguous bases,
-IUPAC ambiguity, gaps, and missing states.
+Run the production suite from the repository root with:
 
-The oracle and production algorithm do not share their reconstruction logic.
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -v
+```
 
-## Fault-regression scenarios
+## Independent publication validation
 
-Permanent examples are chosen to fail if an implementation:
+The separate publication-validation repository exists so that independent
+or deliberately incorrect validation implementations cannot alter the
+production code being tested. Its committed publication snapshot evaluates
+BRANCHSNV v0.1.0a1.
 
-- analyses the wrong side of the branch;
-- substitutes a majority-state shortcut for parsimony;
-- treats a gap as a fifth nucleotide;
-- chooses one arbitrary solution when optimal reconstructions tie;
-- accepts a non-monophyletic descendant list; or
-- matches taxa by position instead of exact name.
+The six validation and empirical-analysis layers are:
 
-## Determinism
+### 1. Independent exhaustive oracle
 
-The CLI is run in separate temporary directories. Result TSVs, membership
-files, and parsed JSON reports must be identical. Existing outputs are not
-replaced without `--force`.
+The oracle explicitly enumerates possible internal-node assignments on small
+rooted trees and independently calculates the whole-tree parsimony optimum and
+the complete set of parent-child state pairs attainable on the focal edge.
 
-## Real working-data check
+The committed validation corpus contains 128,881 tip-pattern × focal-edge
+comparisons across seven topology-edge settings. BRANCHSNV matched the oracle
+in all 128,881 comparisons for global parsimony score, complete optimal
+focal-edge state-pair set, and reconstruction class.
 
-`validation/ak3/` records an external working input pair, exact SHA-256 hashes,
-two exact descendant lists, and committed expected TSVs. The large alignment
-and tree are not duplicated in this repository. The validation script refuses
-to run against files with different hashes.
+Coverage includes internal, terminal, and root-adjacent focal edges;
+bifurcating and multifurcating trees; all supported IUPAC ambiguity symbols;
+and gap and missing-data symbols.
 
-The MRSA AK3 360-descendant branch yields the 23 SNV positions reported in the
-published MRSA branch table after excluding the table's deletion, which is
-outside the current BRANCHSNV alpha scope.
+### 2. Deliberately faulted implementations
 
-The 385-descendant working branch yields 15 SNVs. Fourteen positions overlap
-the published SaPITokyo12571-like branch table's SNV rows, while position
-1,891,191 is additionally present in the supplied working files. The nucleotide
-directions in those working files also differ from the published table for
-those positions. This discrepancy is preserved and documented rather than
-silently reconciled.
+Ten controlled fault classes challenge rooting, branch selection, taxon
+mapping, state handling, reconstruction, and exclusivity logic. Across 280,216
+fault-challenge comparisons, all 10 fault classes were detected; 118,916
+comparisons produced outputs that differed from the correct implementation.
 
-The published article is:
+The differentiation fractions are properties of the deliberately constructed
+challenge sets and are not estimates of fault prevalence in empirical data.
 
-> White RT et al. *Microbial Genomics* 2025;11:001452.
-> DOI: 10.1099/mgen.0.001452.
+### 3. SNPPar comparison
+
+Four public SNV matrices distributed with the SNPPar validation data were
+analysed across 816 descendant-defined branch-matrix comparisons.
+
+BRANCHSNV classified 877 focal-edge substitutions as unambiguous. All 877
+matched SNPPar in descendant-defined edge, genomic position, and parent-to-child
+nucleotide direction. SNPPar reported 66 additional events; every one was
+contained in BRANCHSNV's globally optimal focal-edge pair set but was classified
+by BRANCHSNV as placement-ambiguous because equally optimal reconstructions
+included both a change and no change on the focal edge.
+
+### 4. Published focal branches
+
+BRANCHSNV reproduced all 46 published SNV positions and corresponding
+branch-state contrasts across three focal branches:
+
+- 23 MRSA AK3 SNVs;
+- 10 MRSA ST97 SNVs; and
+- 13 *E. coli* ST131/OXA-48 SNVs.
+
+All 46 were classified as both fixed-exclusive and `unambiguous_change`.
+Published insertion/deletion events were excluded because the current release
+reconstructs nucleotide substitutions only.
+
+### 5. Complete-phylogeny empirical analysis
+
+Five rooted bacterial phylogenies were evaluated across 1,804 eligible
+non-root-adjacent branches. Of 31,644 informative site-edge comparisons:
+
+- 30,817 (97.39%) were both fixed-exclusive and unambiguous focal-edge
+  substitutions;
+- 675 (2.13%) were unambiguous focal-edge substitutions that were not
+  fixed-exclusive; and
+- 152 (0.48%) were placement-ambiguous.
+
+Thus, 827/31,644 informative comparisons (2.61%) fell outside the intersection
+of the two criteria. In 645/675 (95.56%) non-exclusive unambiguous focal-edge
+substitutions, the derived nucleotide also occurred elsewhere in the same
+phylogeny.
+
+### 6. Scalability
+
+The committed benchmark contains 39 measured command-line invocations spanning
+taxon scaling, site scaling, and analysis-mode comparisons. All 39 runs
+completed. Runtime and peak resident memory were approximately linear over the
+tested taxon and site ranges.
+
+## Snapshot integrity and production-source identity
+
+The publication-validation repository stores machine-readable result snapshots,
+input and result checksums, and hashes of the production source files used by
+its experiments.
+
+From the validation repository root:
+
+```bash
+python verify_publication_snapshot.py
+```
+
+verifies the committed empirical inputs, result checksums, and headline claims.
+The committed snapshot reports:
+
+```text
+PUBLICATION SNAPSHOT: PASS
+```
+
+The production `analysis.py` and `parsimony.py` hashes recorded by the
+publication-validation snapshot match the corresponding v0.1.0a1 files in this
+repository.
+
+## Bundled example and package validation
+
+GitHub Actions installs BRANCHSNV from the repository, runs the test suite,
+reproduces the bundled example against committed expected outputs, builds both
+wheel and source distributions, validates them with `twine`, installs each into
+a clean environment, runs the installed command, and checks the installed
+package.
+
+These packaging checks complement the scientific validation: they test that the
+software users install is usable and contains the expected package metadata.
+
+## Legacy AK3 working-data regression recipe
+
+[`validation/ak3/`](../validation/ak3/) predates the publication-validation
+repository. It records checksum-gated working files and expected outputs for two
+branches in an MRSA AK3 working dataset.
+
+It remains useful as a permanent regression fixture, but it is **not** the
+authoritative publication-validation record. The publication claims are tied to
+the separate `branchsnv-validation` repository described above.

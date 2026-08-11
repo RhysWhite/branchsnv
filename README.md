@@ -6,7 +6,6 @@
   >
 </p>
 
-
 [![CI](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml/badge.svg)](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml/badge.svg)](https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml)
 ![Python 3.10–3.14](https://img.shields.io/badge/Python-3.10%E2%80%933.14-3776AB?logo=python&logoColor=white)
@@ -15,12 +14,14 @@
 ![Status: alpha](https://img.shields.io/badge/status-alpha-orange)
 
 **Identify nucleotide states that distinguish a clade and substitutions that
-reconstruct to a selected phylogenetic branch — without manual comparison.**
+reconstruct to a selected phylogenetic branch — without conflating the two.**
 
-BRANCHSNV is a dependency-free Python command-line tool for rooted bacterial
-phylogenies and transposed NEXUS SNV matrices. It validates exact taxon
-membership, identifies the descendants of a selected branch, and produces
-reproducible results with SHA-256 provenance.
+BRANCHSNV is a dependency-free Python command-line tool for interrogating one
+selected branch of a rooted bacterial phylogeny using a transposed NEXUS SNV
+matrix. It reports strict clade-exclusive nucleotide markers separately from
+substitutions reconstructed on the focal edge, retains uncertainty across
+all globally optimal equal-cost parsimony solutions, validates exact taxon and
+branch membership, and records deterministic SHA-256 provenance.
 
 ```text
 transposed NEXUS alignment  ─┐
@@ -43,9 +44,9 @@ exact focal-clade tip list ──┘                  members.txt
 | `parsimony` | Which substitutions reconstruct to the selected branch? | Parent and child states are evaluated across **all** globally optimal equal-cost Sankoff reconstructions. |
 | `both` | Which sites meet either definition? | Reports the union and records the reason for each row. This is the default. |
 
-The definitions are deliberately separate. A perfect clade marker can have
+The definitions are deliberately separate. A strict clade marker can have
 ambiguous placement on the incoming branch, while a reconstructed branch change
-can recur elsewhere and therefore not be exclusive.
+can recur elsewhere and therefore not be clade-exclusive.
 
 ## Installation
 
@@ -88,8 +89,8 @@ Selected b_daee1cd25194ae95 (2 descendants); reported 2 of 6 sites.
 ```
 
 The full TSV contains the original site identifier, inferred parent and child
-states, all optimal state pairs, call counts, parsimony score, and selection
-reason. The example reduces to:
+states, all optimal focal-edge state pairs, call counts, parsimony score, and
+selection reason. The example reduces to:
 
 | Site | Reconstructed change | Parsimony status | Fixed-exclusive | Reported because |
 |---|---:|---|---:|---|
@@ -213,7 +214,8 @@ directories. Its schema is documented in
 ## Parsimony classifications
 
 BRANCHSNV uses unordered equal-cost Sankoff parsimony over `A`, `C`, `G`, and
-`T`, retaining every globally optimal reconstruction.
+`T`, retaining the complete set of parent-child state pairs attainable on the
+focal edge among globally optimal reconstructions.
 
 | Status | Interpretation |
 |---|---|
@@ -255,28 +257,43 @@ interpretive cautions.
 
 ## Validation and reproducibility
 
-BRANCHSNV uses layered validation rather than relying on a few successful
-example files. The repository includes:
+Production tests and publication validation are deliberately separated.
 
-- strict parser and topology fixtures;
-- comparison with an independent exhaustive internal-state oracle on generated
-  small-tree patterns;
-- permanent fault-regression scenarios designed to catch plausible incorrect
-  implementations;
-- deterministic-output and cross-platform line-ending checks;
-- clean wheel and source-distribution validation; and
-- a working-data validation recipe for two branches in a published MRSA AK3
-  dataset.
+The **production repository** contains the unit, regression, determinism,
+packaging, and bundled-example checks used during development. The current test
+suite contains **42 tests** and is run across Python 3.10–3.14, with additional
+macOS and Windows jobs in GitHub Actions.
 
-Run the test suite after development installation:
+The independent **publication-validation repository** is maintained separately
+at [RhysWhite/branchsnv-validation](https://github.com/RhysWhite/branchsnv-validation).
+Its committed snapshot evaluates **BRANCHSNV v0.1.0a1** and currently records:
+
+| Validation layer | Result |
+|---|---|
+| Independent exhaustive oracle | 128,881/128,881 exact comparisons across seven topology–edge settings |
+| Deliberately faulted implementations | 10/10 fault classes detected across 280,216 fault–challenge comparisons |
+| SNPPar comparison | 877/877 BRANCHSNV-unambiguous substitutions matched SNPPar; 66 additional SNPPar events were retained as placement-ambiguous |
+| Published focal branches | 46/46 published SNVs reproduced across MRSA AK3, MRSA ST97, and *E. coli* ST131/OXA-48 |
+| Complete-phylogeny empirical analysis | 31,644 informative comparisons across five phylogenies; 827 (2.61%) fell outside the fixed-exclusive/unambiguous-substitution intersection |
+| Scalability | 39/39 measured end-to-end command-line runs completed |
+
+The validation repository stores machine-readable result snapshots, input and
+result checksums, production-source hashes, experiment code, and a top-level
+integrity checker. From a checkout of that repository:
 
 ```bash
-python -m unittest discover -s tests -v
+python verify_publication_snapshot.py
 ```
 
-See [`VALIDATION_REPORT.md`](VALIDATION_REPORT.md),
-[`docs/validation.md`](docs/validation.md), and
-[`validation/ak3/README.md`](validation/ak3/README.md).
+should report `PUBLICATION SNAPSHOT: PASS` for the committed publication
+snapshot.
+
+The older [`validation/ak3/`](validation/ak3/) directory in this repository is
+retained as a checksum-gated working-data regression recipe. It is **not** the
+authoritative publication-validation record.
+
+See [`VALIDATION_REPORT.md`](VALIDATION_REPORT.md) and
+[`docs/validation.md`](docs/validation.md) for details.
 
 ## Documentation
 
@@ -322,7 +339,7 @@ BRANCHSNV was developed and is maintained by [Rhys White](https://github.com/Rhy
 ## Citation
 
 Citation metadata are provided in [`CITATION.cff`](CITATION.cff). A permanent
-archive DOI should be added after the first public release.
+archive DOI should be added after the first stable public release is archived.
 
 ## Licence
 

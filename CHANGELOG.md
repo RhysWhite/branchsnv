@@ -7,6 +7,19 @@ and releases use semantic versioning.
 
 ## [Unreleased]
 
+### Changed
+
+- Reframed repository validation documentation around the independent
+  `branchsnv-validation` publication framework and its six committed experiment
+  layers.
+- Updated the production validation report to the current 42-test suite and
+  separated publication validation from the legacy AK3 working-data regression
+  fixture.
+- Updated release guidance so stable releases are validated against the exact
+  release candidate before downstream packaging.
+- Removed the obsolete development-only GitHub setup document from the public
+  source package.
+
 ## [0.1.0a1] - 2026-07-31
 
 

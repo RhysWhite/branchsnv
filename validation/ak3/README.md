@@ -1,8 +1,15 @@
-# AK3 working-dataset validation
+# Legacy AK3 working-data regression check
 
-This directory records a real-data validation using the working files supplied
-for development of BRANCHSNV. The large alignment and tree are not duplicated
-in the repository.
+> [!NOTE]
+> This directory predates the independent publication-validation repository and
+> is retained as a permanent regression fixture for the exact development
+> inputs described below. It is **not** the authoritative validation record for
+> the BRANCHSNV manuscript. The complete publication validation is maintained at
+> [RhysWhite/branchsnv-validation](https://github.com/RhysWhite/branchsnv-validation).
+
+This directory records a checksum-gated real-data regression check using the
+working files supplied during development of BRANCHSNV. The large alignment and
+tree are not duplicated in this repository.
 
 ## Required external files
 
@@ -25,16 +32,16 @@ Membership, not descendant count alone, defines each branch.
 
 The 360-descendant branch produces 23 SNV rows, matching the SNV positions in
 the published MRSA AK3 branch table. The published deletion is outside the
-scope of the current BRANCHSNV alpha.
+scope of BRANCHSNV v0.1.0a1.
 
-The 385-descendant branch produces 15 SNV rows. Fourteen coordinates overlap
-the published SaPITokyo12571-like branch table's SNV rows; coordinate 1,891,191
-is additionally present in the supplied working inputs. The nucleotide
-directions in the working matrix differ from the corresponding published table
-entries. These observations are documented as an unresolved input/publication
-version difference rather than being changed to force agreement.
+The 385-descendant working branch produces 15 SNV rows. Fourteen coordinates
+overlap the published SaPITokyo12571-like branch table's SNV rows; coordinate
+1,891,191 is additionally present in the supplied working inputs. The
+nucleotide directions in the working matrix differ from the corresponding
+published table entries. These observations are preserved as a documented
+working-input/publication difference rather than altered to force agreement.
 
-## Run the validation
+## Run the regression check
 
 ```bash
 bash validation/ak3/run_validation.sh \

@@ -9,9 +9,9 @@ version: 0.1.0a1
 license: MIT
 repository-code: "https://github.com/RhysWhite/branchsnv"
 abstract: >-
-  BRANCHSNV is a dependency-free Python command-line tool for identifying
-  fixed clade-associated nucleotide states and reconstructing single-nucleotide
-  substitutions on selected branches of rooted phylogenetic trees.
+  BRANCHSNV is a dependency-free Python command-line tool for reporting strict
+  clade-exclusive nucleotide markers separately from single-nucleotide
+  substitutions reconstructed on selected edges of rooted phylogenetic trees.
 keywords:
   - phylogenetics
   - bacterial genomics

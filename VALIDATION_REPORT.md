@@ -1,94 +1,113 @@
-# BRANCHSNV alpha validation report
+# BRANCHSNV validation overview
 
-**Version:** 0.1.0a1  
-**Validation date:** 31 July 2026  
-**Local environment:** Python 3.13.5 on Linux
+**Software version:** 0.1.0a1
 
-This report records checks completed before the initial repository handoff. It
-is not a substitute for the GitHub Actions matrix, which will run only after the
-repository is pushed.
+BRANCHSNV uses two complementary validation layers:
 
-## Standard-library test suite
+1. tests and packaging checks maintained with the production software; and
+2. an independent publication-validation framework maintained separately at
+   [RhysWhite/branchsnv-validation](https://github.com/RhysWhite/branchsnv-validation).
 
-The complete suite passed:
+This separation prevents the independent oracle and deliberately faulted
+implementations from sharing or modifying the production reconstruction logic.
 
-```text
-Ran 39 tests
-OK
-```
+## Production test suite
 
-The suite covers:
+The current production suite passes **42/42 tests**.
+
+It covers:
 
 - strict transposed NEXUS parsing and malformed-input rejection;
-- Newick parsing, rerooting, multifurcations, and deterministic branch IDs;
+- Newick parsing, explicit rerooting, multifurcations, and deterministic branch
+  IDs;
 - exact branch selection, MRCA selection, and non-monophyly rejection;
-- fixed-exclusive marker rules with strict inside and outside callability;
-- exact selected-edge Sankoff reconstruction;
-- comparison with an independent exhaustive enumeration oracle for 250
-  deterministic generated patterns containing bases, IUPAC ambiguity, gaps,
-  and missing data;
+- strict fixed-exclusive marker rules with complete inside/outside callability;
+- focal-edge equal-cost Sankoff reconstruction;
+- generated comparisons against an independent exhaustive internal-state
+  oracle;
 - permanent fault-regression patterns;
-- output/input path collision protection;
-- deterministic results across distinct `PYTHONHASHSEED` values;
-- output overwrite protection;
-- provenance checksum and count consistency; and
-- report-schema JSON integrity.
+- deterministic output across separate processes and `PYTHONHASHSEED` values;
+- LF line-ending consistency;
+- output overwrite and input/output collision protection;
+- provenance checksum and count consistency;
+- report-schema integrity; and
+- release-metadata consistency.
+
+Run the suite with:
+
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -v
+```
+
+GitHub Actions runs the test suite on Python 3.10–3.14 on Linux and additionally
+on macOS and Windows with Python 3.14.
 
 ## Bundled example
 
-The installed command reproduced the committed simple example byte-for-byte:
+The installed command reproduces the committed simple example:
 
 - 5 taxa;
 - 6 sites;
-- 2 descendants on the selected branch;
+- 2 descendants on the selected branch; and
 - 2 reported rows in default `both` mode.
 
-## AK3 working-data validation
+GitHub Actions compares the generated `results.tsv`, `members.txt`, and
+`report.json` with the committed expected files.
 
-The following external files were verified by SHA-256 before analysis:
+## Publication-validation snapshot
 
-```text
-40c49b026c52e04530ecbbee7044567ac3355eccf7adda42a7d96bf977df9014  396_MRSA_AK3(1).nex
-18322b2808baf621d09dd5292027205e68a0f207d7be44f043bd044d0d314bd0  Cluster_1_396genomes_refsa230905_barcode06_ML_Flitered_BS.nwk
+The separate publication-validation repository contains six experiment layers.
+Its committed snapshot evaluates BRANCHSNV v0.1.0a1 and verifies the following
+headline results:
+
+| Experiment | Result |
+|---|---|
+| Independent exhaustive oracle | 128,881/128,881 exact comparisons across seven topology-edge settings |
+| Deliberately faulted implementations | 10/10 fault classes detected across 280,216 fault-challenge comparisons; 118,916 differentiating outputs |
+| SNPPar comparison | 877/877 BRANCHSNV-unambiguous substitutions matched SNPPar; 66 additional SNPPar events were retained as placement-ambiguous |
+| Published focal branches | 46/46 published SNVs reproduced across MRSA AK3, MRSA ST97, and *E. coli* ST131/OXA-48 |
+| Complete-phylogeny empirical analysis | 31,644 informative comparisons across five phylogenies; 827 (2.61%) fell outside the fixed-exclusive/unambiguous-substitution intersection |
+| Scalability | 39/39 measured end-to-end command-line runs completed |
+
+For the 675 unambiguous focal-edge substitutions that were not fixed-exclusive,
+645 (95.56%) had the derived nucleotide elsewhere in the same phylogeny.
+
+The snapshot is integrity-gated with SHA-256 manifests. From the validation
+repository root:
+
+```bash
+python verify_publication_snapshot.py
 ```
 
-Structural validation found:
+returns:
 
-- 396 NEXUS taxa;
-- 396 Newick tips;
-- exact 396/396 name correspondence;
-- 10,481 matrix rows; and
-- explicit outgroup rooting with `SRR13968194`.
+```text
+PUBLICATION SNAPSHOT: PASS
+```
 
-Real-data results:
+The production-source SHA-256 hashes recorded by the validation snapshot for
+`analysis.py` and `parsimony.py` match the corresponding files in this
+v0.1.0a1 production snapshot.
 
-- 385-descendant working branch: 15 fixed-exclusive and unambiguous-parsimony
-  SNV rows;
-- 360-descendant MRSA AK3 branch: 23 fixed-exclusive and
-  unambiguous-parsimony SNV rows.
+## Packaging and installed-package checks
 
-The 360-branch positions match the 23 SNV rows in the published MRSA AK3 branch
-table; its deletion is outside the current tool scope.
+The CI build job:
 
-The 385-branch working files contain 14 positions present in the published
-SaPITokyo12571-like branch table plus position 1,891,191. The nucleotide
-orientations in the supplied matrix differ from the corresponding published
-table entries. This remains documented as an unresolved working-input versus
-publication discrepancy. BRANCHSNV does not alter output to force agreement.
+1. builds both wheel and source distributions from `pyproject.toml`;
+2. validates the distributions with `twine check`;
+3. installs each distribution into a clean virtual environment;
+4. runs the installed `branchsnv --version` command;
+5. validates the installed package contents; and
+6. runs `pip check`.
 
-## Packaging
+The package declares no runtime dependencies.
 
-The alpha wheel was built with setuptools, installed into a clean virtual
-environment, and executed through the installed `branchsnv` console command.
-Wheel metadata contained no `Requires-Dist` entries, confirming no runtime
-dependencies.
+## Legacy AK3 working-data regression
 
-The source distribution and wheel were both built successfully from
-`pyproject.toml`. The source distribution was inspected to confirm that it did
-not contain bytecode caches or build directories.
+The [`validation/ak3/`](validation/ak3/) directory is retained as an older,
+checksum-gated working-data regression recipe. It is useful for guarding
+against changes in behaviour on those exact development inputs, but it is no
+longer the primary evidence supporting BRANCHSNV's scientific validation.
 
-## Checks deferred to GitHub
-
-The repository configures CI for Python 3.10, 3.11, 3.12, 3.13, and 3.14, plus
-CodeQL and clean package builds. Those hosted checks have not yet run and must
-pass before a final `v0.1.0` release.
+The authoritative manuscript-associated validation record is the separate
+`branchsnv-validation` repository.
