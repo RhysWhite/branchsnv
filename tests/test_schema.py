@@ -47,6 +47,15 @@ class SchemaTests(unittest.TestCase):
         self.assertEqual(parameters["properties"]["fixed_exclusive_descendant_call_rate"]["const"], 1.0)
         self.assertEqual(parameters["properties"]["fixed_exclusive_outside_call_rate"]["const"], 1.0)
 
+    def test_provenance_file_names_must_be_non_empty(self) -> None:
+        path = Path(__file__).parents[1] / "schemas" / "branchsnv-report.schema.json"
+        schema = json.loads(path.read_text(encoding="utf-8"))
+
+        for definition in ("alignmentInput", "treeInput", "outputFile"):
+            name_schema = schema["$defs"][definition]["properties"]["name"]
+            self.assertEqual(name_schema["type"], "string")
+            self.assertEqual(name_schema["minLength"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()
