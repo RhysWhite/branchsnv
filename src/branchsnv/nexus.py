@@ -132,16 +132,43 @@ def _tokenize(text: str) -> list[str]:
     return tokens
 
 
+def _mask_quoted_text(text: str) -> str:
+    """Mask quoted strings while preserving character offsets and line breaks."""
+
+    masked = list(text)
+    quote: str | None = None
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if quote is not None:
+            masked[index] = "\n" if char == "\n" else " "
+            if char == quote:
+                if quote == "'" and index + 1 < len(text) and text[index + 1] == "'":
+                    index += 1
+                    masked[index] = " "
+                else:
+                    quote = None
+        elif char in {"'", '"'}:
+            quote = char
+            masked[index] = " "
+        index += 1
+    return "".join(masked)
+
+
 def _find_data_block(text: str) -> tuple[str, int]:
+    searchable = _mask_quoted_text(text)
     pattern = re.compile(r"\bbegin\s+(data|characters)\s*;", re.IGNORECASE)
-    matches = list(pattern.finditer(text))
+    matches = list(pattern.finditer(searchable))
     if not matches:
         raise NexusFormatError("No BEGIN DATA or BEGIN CHARACTERS block was found.")
     if len(matches) > 1:
         raise NexusFormatError("Multiple DATA/CHARACTERS blocks are not supported.")
     match = matches[0]
     remainder = text[match.end() :]
-    end_match = re.search(r"\bend(?:block)?\s*;", remainder, re.IGNORECASE)
+    searchable_remainder = searchable[match.end() :]
+    end_match = re.search(
+        r"\bend(?:block)?\s*;", searchable_remainder, re.IGNORECASE
+    )
     if not end_match:
         raise NexusFormatError("The DATA block has no terminating END; statement.")
     block_start_line = text.count("\n", 0, match.end()) + 1

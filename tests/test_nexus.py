@@ -39,6 +39,45 @@ class NexusTests(unittest.TestCase):
         self.assertEqual(alignment.taxa[0], "tax one")
         self.assertEqual(alignment.sites[0].states, "ACGT")
 
+    def test_data_block_end_ignores_quoted_end_marker(self) -> None:
+        text = """#NEXUS
+        BEGIN DATA;
+        DIMENSIONS NTAX=2 NCHAR=1;
+        FORMAT DATATYPE=DNA TRANSPOSE GAP=- MISSING=?;
+        TAXLABELS 'END;' B;
+        MATRIX
+        site1 A C
+        ;
+        END;
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "quoted_end.nex"
+            path.write_text(text, encoding="utf-8")
+            alignment = read_transposed_nexus(path)
+        self.assertEqual(alignment.taxa, ("END;", "B"))
+        self.assertEqual(alignment.sites[0].states, "AC")
+
+    def test_data_block_start_ignores_quoted_begin_marker(self) -> None:
+        text = """#NEXUS
+        BEGIN NOTES;
+        TEXT 'BEGIN DATA;';
+        END;
+        BEGIN DATA;
+        DIMENSIONS NTAX=2 NCHAR=1;
+        FORMAT DATATYPE=DNA TRANSPOSE GAP=- MISSING=?;
+        TAXLABELS A B;
+        MATRIX
+        site1 A C
+        ;
+        END;
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "quoted_begin.nex"
+            path.write_text(text, encoding="utf-8")
+            alignment = read_transposed_nexus(path)
+        self.assertEqual(alignment.taxa, ("A", "B"))
+        self.assertEqual(alignment.sites[0].states, "AC")
+
     def test_rejects_non_transposed_matrix(self) -> None:
         text = """#NEXUS
         BEGIN DATA;
