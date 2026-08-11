@@ -60,8 +60,6 @@ def _split_commands(text: str) -> list[tuple[str, int]]:
 
     commands: list[tuple[str, int]] = []
     start = 0
-    line = 1
-    start_line = 1
     quote: str | None = None
     index = 0
     while index < len(text):
@@ -75,15 +73,14 @@ def _split_commands(text: str) -> list[tuple[str, int]]:
         elif char in {"'", '"'}:
             quote = char
         elif char == ";":
-            command = text[start:index].strip()
+            raw_command = text[start:index]
+            command = raw_command.strip()
             if command:
-                commands.append((command, start_line))
+                leading = len(raw_command) - len(raw_command.lstrip())
+                command_start = start + leading
+                command_line = text.count("\n", 0, command_start) + 1
+                commands.append((command, command_line))
             start = index + 1
-            start_line = line
-        if char == "\n":
-            line += 1
-            if start == index + 1:
-                start_line = line
         index += 1
 
     if text[start:].strip():
@@ -135,7 +132,7 @@ def _tokenize(text: str) -> list[str]:
     return tokens
 
 
-def _find_data_block(text: str) -> str:
+def _find_data_block(text: str) -> tuple[str, int]:
     pattern = re.compile(r"\bbegin\s+(data|characters)\s*;", re.IGNORECASE)
     matches = list(pattern.finditer(text))
     if not matches:
@@ -147,7 +144,8 @@ def _find_data_block(text: str) -> str:
     end_match = re.search(r"\bend(?:block)?\s*;", remainder, re.IGNORECASE)
     if not end_match:
         raise NexusFormatError("The DATA block has no terminating END; statement.")
-    return remainder[: end_match.start()]
+    block_start_line = text.count("\n", 0, match.end()) + 1
+    return remainder[: end_match.start()], block_start_line
 
 
 def _parse_dimensions(command: str) -> tuple[int, int]:
@@ -244,7 +242,7 @@ def read_transposed_nexus(path: str | Path) -> Alignment:
     text = _strip_comments(raw)
     if not re.search(r"^\s*#nexus\b", text, re.IGNORECASE):
         raise NexusFormatError("File does not begin with #NEXUS.")
-    block = _find_data_block(text)
+    block, block_start_line = _find_data_block(text)
     commands = _split_commands(block)
 
     dimensions: tuple[int, int] | None = None
@@ -252,12 +250,14 @@ def read_transposed_nexus(path: str | Path) -> Alignment:
     taxa: list[str] | None = None
     matrix_command: tuple[str, int] | None = None
 
-    for command, line_number in commands:
+    for command, relative_line_number in commands:
+        line_number = block_start_line + relative_line_number - 1
         keyword_match = re.match(r"\s*([A-Za-z]+)", command)
         if not keyword_match:
             continue
         keyword = keyword_match.group(1).lower()
-        body = command[keyword_match.end() :].strip()
+        raw_body = command[keyword_match.end() :]
+        body = raw_body.strip()
         if keyword == "dimensions":
             if dimensions is not None:
                 raise NexusFormatError("Multiple DIMENSIONS commands are not supported.")
@@ -273,7 +273,9 @@ def read_transposed_nexus(path: str | Path) -> Alignment:
         elif keyword == "matrix":
             if matrix_command is not None:
                 raise NexusFormatError("Multiple MATRIX commands are not supported.")
-            matrix_command = (body, line_number)
+            leading = len(raw_body) - len(raw_body.lstrip())
+            body_start_line = line_number + raw_body[:leading].count("\n")
+            matrix_command = (body, body_start_line)
 
     if dimensions is None:
         raise NexusFormatError("DATA block has no DIMENSIONS command.")
@@ -299,7 +301,7 @@ def read_transposed_nexus(path: str | Path) -> Alignment:
     sites: list[Site] = []
     site_ids: set[str] = set()
     allowed = _IUPAC | {gap.upper(), missing.upper()}
-    for offset, raw_line in enumerate(matrix_body.splitlines(), start=1):
+    for offset, raw_line in enumerate(matrix_body.splitlines()):
         if not raw_line.strip():
             continue
         tokens = _tokenize(raw_line)

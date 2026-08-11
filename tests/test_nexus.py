@@ -198,6 +198,25 @@ class NexusTests(unittest.TestCase):
             with self.assertRaisesRegex(NexusFormatError, "Multiple DATA/CHARACTERS"):
                 read_transposed_nexus(path)
 
+    def test_reports_exact_matrix_row_line_number(self) -> None:
+        text = """#NEXUS
+BEGIN DATA;
+DIMENSIONS NTAX=2 NCHAR=1;
+FORMAT TRANSPOSE SYMBOLS='ACGT';
+TAXLABELS A B;
+MATRIX
+site_only
+;
+END;
+"""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bad.nex"
+            path.write_text(text, encoding="utf-8")
+            with self.assertRaisesRegex(
+                NexusFormatError, r"Matrix row near line 7 must contain"
+            ):
+                read_transposed_nexus(path)
+
     def test_rejects_matchchar_and_equate_directives(self) -> None:
         templates = [
             "MATCHCHAR=.",
