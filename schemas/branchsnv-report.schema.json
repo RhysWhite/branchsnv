@@ -16,26 +16,55 @@
     "warnings"
   ],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {
+      "const": 1
+    },
     "tool": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "version"],
+      "required": [
+        "name",
+        "version"
+      ],
       "properties": {
-        "name": {"const": "BRANCHSNV"},
-        "version": {"type": "string", "minLength": 1}
+        "name": {
+          "const": "BRANCHSNV"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
     "inputs": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["alignment", "tree"],
+      "required": [
+        "alignment",
+        "tree"
+      ],
       "properties": {
-        "alignment": {"$ref": "#/$defs/alignmentInput"},
-        "tree": {"$ref": "#/$defs/treeInput"}
+        "alignment": {
+          "$ref": "#/$defs/alignmentInput"
+        },
+        "tree": {
+          "$ref": "#/$defs/treeInput"
+        }
       }
     },
-    "rooting": {"type": "object"},
+    "rooting": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/rootingExistingRoot"
+        },
+        {
+          "$ref": "#/$defs/rootingOutgroup"
+        },
+        {
+          "$ref": "#/$defs/rootingOutgroupFile"
+        }
+      ]
+    },
     "branch": {
       "type": "object",
       "additionalProperties": false,
@@ -47,14 +76,76 @@
         "selection"
       ],
       "properties": {
-        "branch_id": {"type": "string", "pattern": "^b_[0-9a-f]{64}$"},
-        "short_id": {"type": "string", "pattern": "^b_[0-9a-f]{16}$"},
-        "descendant_count": {"type": "integer", "minimum": 1},
-        "descendant_taxa_sha256": {"$ref": "#/$defs/sha256"},
-        "selection": {"type": "object"}
+        "branch_id": {
+          "type": "string",
+          "pattern": "^b_[0-9a-f]{64}$"
+        },
+        "short_id": {
+          "type": "string",
+          "pattern": "^b_[0-9a-f]{16}$"
+        },
+        "descendant_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "descendant_taxa_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "selection": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/selectionExactDescendantFile"
+            },
+            {
+              "$ref": "#/$defs/selectionMrca"
+            },
+            {
+              "$ref": "#/$defs/selectionBranchId"
+            }
+          ]
+        }
       }
     },
-    "parameters": {"type": "object"},
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "include_ambiguous_parsimony_sites",
+        "state_cost_model",
+        "gap_treatment",
+        "missing_treatment",
+        "fixed_exclusive_descendant_call_rate",
+        "fixed_exclusive_outside_call_rate"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "fixed-exclusive",
+            "parsimony",
+            "both"
+          ]
+        },
+        "include_ambiguous_parsimony_sites": {
+          "type": "boolean"
+        },
+        "state_cost_model": {
+          "const": "unordered_equal_cost"
+        },
+        "gap_treatment": {
+          "const": "unknown_state"
+        },
+        "missing_treatment": {
+          "const": "unknown_state"
+        },
+        "fixed_exclusive_descendant_call_rate": {
+          "const": 1.0
+        },
+        "fixed_exclusive_outside_call_rate": {
+          "const": 1.0
+        }
+      }
+    },
     "results": {
       "type": "object",
       "additionalProperties": false,
@@ -65,9 +156,18 @@
         "parsimony"
       ],
       "properties": {
-        "sites_examined": {"type": "integer", "minimum": 0},
-        "reported_sites": {"type": "integer", "minimum": 0},
-        "fixed_exclusive_sites": {"type": "integer", "minimum": 0},
+        "sites_examined": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reported_sites": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fixed_exclusive_sites": {
+          "type": "integer",
+          "minimum": 0
+        },
         "parsimony": {
           "type": "object",
           "additionalProperties": false,
@@ -78,10 +178,22 @@
             "no_change"
           ],
           "properties": {
-            "unambiguous_change": {"type": "integer", "minimum": 0},
-            "change_state_ambiguous": {"type": "integer", "minimum": 0},
-            "placement_ambiguous": {"type": "integer", "minimum": 0},
-            "no_change": {"type": "integer", "minimum": 0}
+            "unambiguous_change": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "change_state_ambiguous": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "placement_ambiguous": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "no_change": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
         }
       }
@@ -89,16 +201,155 @@
     "outputs": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["results_tsv", "branch_members"],
+      "required": [
+        "results_tsv",
+        "branch_members"
+      ],
       "properties": {
-        "results_tsv": {"$ref": "#/$defs/outputFile"},
-        "branch_members": {"$ref": "#/$defs/outputFile"}
+        "results_tsv": {
+          "$ref": "#/$defs/outputFile"
+        },
+        "branch_members": {
+          "$ref": "#/$defs/outputFile"
+        }
       }
     },
-    "warnings": {"type": "array", "items": {"type": "string"}}
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
   },
   "$defs": {
-    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "taxonName": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\r\\n]+$"
+    },
+    "taxonList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/taxonName"
+      }
+    },
+    "rootingExistingRoot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "outgroup"
+      ],
+      "properties": {
+        "method": {
+          "const": "existing_newick_root"
+        },
+        "outgroup": {
+          "const": []
+        }
+      }
+    },
+    "rootingOutgroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "outgroup"
+      ],
+      "properties": {
+        "method": {
+          "const": "outgroup"
+        },
+        "outgroup": {
+          "$ref": "#/$defs/taxonList"
+        }
+      }
+    },
+    "rootingOutgroupFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "outgroup",
+        "source",
+        "source_sha256"
+      ],
+      "properties": {
+        "method": {
+          "const": "outgroup_file"
+        },
+        "outgroup": {
+          "$ref": "#/$defs/taxonList"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "selectionExactDescendantFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "source",
+        "sha256"
+      ],
+      "properties": {
+        "method": {
+          "const": "exact_descendant_file"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "selectionMrca": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "tips"
+      ],
+      "properties": {
+        "method": {
+          "const": "mrca"
+        },
+        "tips": {
+          "$ref": "#/$defs/taxonList"
+        }
+      }
+    },
+    "selectionBranchId": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "requested"
+      ],
+      "properties": {
+        "method": {
+          "const": "branch_id"
+        },
+        "requested": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "alignmentInput": {
       "type": "object",
       "additionalProperties": false,
@@ -112,33 +363,74 @@
         "missing_symbol"
       ],
       "properties": {
-        "name": {"type": "string"},
-        "sha256": {"$ref": "#/$defs/sha256"},
-        "ntax": {"type": "integer", "minimum": 1},
-        "nchar": {"type": "integer", "minimum": 1},
-        "format": {"const": "transposed_nexus"},
-        "gap_symbol": {"type": "string", "minLength": 1, "maxLength": 1},
-        "missing_symbol": {"type": "string", "minLength": 1, "maxLength": 1}
+        "name": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "ntax": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "nchar": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "format": {
+          "const": "transposed_nexus"
+        },
+        "gap_symbol": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1
+        },
+        "missing_symbol": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1
+        }
       }
     },
     "treeInput": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "sha256", "tips", "format"],
+      "required": [
+        "name",
+        "sha256",
+        "tips",
+        "format"
+      ],
       "properties": {
-        "name": {"type": "string"},
-        "sha256": {"$ref": "#/$defs/sha256"},
-        "tips": {"type": "integer", "minimum": 2},
-        "format": {"const": "newick"}
+        "name": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "tips": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "format": {
+          "const": "newick"
+        }
       }
     },
     "outputFile": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "sha256"],
+      "required": [
+        "name",
+        "sha256"
+      ],
       "properties": {
-        "name": {"type": "string"},
-        "sha256": {"$ref": "#/$defs/sha256"}
+        "name": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     }
   }

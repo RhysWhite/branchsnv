@@ -51,6 +51,31 @@ class ProvenanceTests(unittest.TestCase):
         self.assertEqual(report["outputs"]["branch_members"]["sha256"], members_sha)
         membership_digest = report["branch"]["descendant_taxa_sha256"]
         self.assertEqual(report["branch"]["branch_id"], f"b_{membership_digest}")
+        self.assertEqual(report["branch"]["short_id"], f"b_{membership_digest[:16]}")
+        self.assertEqual(
+            report["rooting"],
+            {"method": "outgroup", "outgroup": ["Outgroup"]},
+        )
+        self.assertEqual(
+            report["branch"]["selection"],
+            {
+                "method": "exact_descendant_file",
+                "source": "ab_tips.txt",
+                "sha256": sha256_file(FIXTURES / "ab_tips.txt"),
+            },
+        )
+        self.assertEqual(
+            report["parameters"],
+            {
+                "mode": "both",
+                "include_ambiguous_parsimony_sites": False,
+                "state_cost_model": "unordered_equal_cost",
+                "gap_treatment": "unknown_state",
+                "missing_treatment": "unknown_state",
+                "fixed_exclusive_descendant_call_rate": 1.0,
+                "fixed_exclusive_outside_call_rate": 1.0,
+            },
+        )
         counts = report["results"]["parsimony"]
         self.assertEqual(sum(counts.values()), report["results"]["sites_examined"])
         self.assertEqual(report["warnings"], [])
