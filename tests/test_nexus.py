@@ -54,6 +54,70 @@ class NexusTests(unittest.TestCase):
             with self.assertRaisesRegex(NexusFormatError, "TRANSPOSE"):
                 read_transposed_nexus(path)
 
+
+    def test_rejects_explicit_transpose_no(self) -> None:
+        text = """#NEXUS
+        BEGIN DATA;
+        DIMENSIONS NTAX=2 NCHAR=1;
+        FORMAT TRANSPOSE=NO SYMBOLS='ACGT';
+        TAXLABELS A B;
+        MATRIX site_1 A C;
+        END;
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bad.nex"
+            path.write_text(text, encoding="utf-8")
+            with self.assertRaisesRegex(NexusFormatError, "TRANSPOSE"):
+                read_transposed_nexus(path)
+
+    def test_accepts_explicit_transpose_yes(self) -> None:
+        text = """#NEXUS
+        BEGIN DATA;
+        DIMENSIONS NTAX=2 NCHAR=1;
+        FORMAT TRANSPOSE=YES SYMBOLS='ACGT';
+        TAXLABELS A B;
+        MATRIX site_1 A C;
+        END;
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "input.nex"
+            path.write_text(text, encoding="utf-8")
+            alignment = read_transposed_nexus(path)
+        self.assertEqual(alignment.sites[0].states, "AC")
+
+    def test_rejects_invalid_gap_and_missing_symbols(self) -> None:
+        directives = [
+            "GAP=XX MISSING=?",
+            "GAP='' MISSING=?",
+            "GAP=- MISSING='??'",
+            "GAP=- MISSING=''",
+            "GAP=a MISSING=A",
+            "GAP=A MISSING=?",
+            "GAP=- MISSING=N",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bad.nex"
+            for directive in directives:
+                with self.subTest(directive=directive):
+                    text = f"""#NEXUS
+                    BEGIN DATA;
+                    DIMENSIONS NTAX=2 NCHAR=1;
+                    FORMAT TRANSPOSE SYMBOLS='ACGT' {directive};
+                    TAXLABELS A B;
+                    MATRIX site_1 A C;
+                    END;
+                    """
+                    path.write_text(text, encoding="utf-8")
+                    with self.assertRaises(NexusFormatError):
+                        read_transposed_nexus(path)
+
+    def test_reports_non_utf8_input_as_nexus_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bad.nex"
+            path.write_bytes(b"#NEXUS\nBEGIN DATA;\xff")
+            with self.assertRaisesRegex(NexusFormatError, "UTF-8"):
+                read_transposed_nexus(path)
+
     def test_rejects_wrong_state_count(self) -> None:
         text = """#NEXUS
         BEGIN DATA;

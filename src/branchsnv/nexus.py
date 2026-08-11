@@ -163,8 +163,17 @@ def _parse_dimensions(command: str) -> tuple[int, int]:
 
 
 def _parse_format(command: str) -> tuple[str, str, str]:
-    if not re.search(r"\btranspose\b", command, re.IGNORECASE):
+    transpose_match = re.search(
+        r"\btranspose\b(?:\s*=\s*([^\s]+))?", command, re.IGNORECASE
+    )
+    if not transpose_match:
         raise NexusFormatError("BRANCHSNV requires FORMAT TRANSPOSE.")
+    transpose_value = transpose_match.group(1)
+    if transpose_value is not None and _unquote(transpose_value).lower() not in {
+        "yes",
+        "true",
+    }:
+        raise NexusFormatError("BRANCHSNV requires FORMAT TRANSPOSE or TRANSPOSE=YES.")
     interleave_match = re.search(
         r"\binterleave\b(?:\s*=\s*([^\s]+))?", command, re.IGNORECASE
     )
@@ -184,8 +193,8 @@ def _parse_format(command: str) -> tuple[str, str, str]:
         command,
         re.IGNORECASE,
     )
-    gap = _unquote(gap_match.group(1))[0] if gap_match else "-"
-    missing = _unquote(missing_match.group(1))[0] if missing_match else "?"
+    gap = _unquote(gap_match.group(1)) if gap_match else "-"
+    missing = _unquote(missing_match.group(1)) if missing_match else "?"
     if symbols_match:
         symbols = next(group for group in symbols_match.groups() if group is not None)
     else:
@@ -195,8 +204,14 @@ def _parse_format(command: str) -> tuple[str, str, str]:
         raise NexusFormatError("FORMAT SYMBOLS must include A, C, G, and T.")
     if len(gap) != 1 or len(missing) != 1:
         raise NexusFormatError("GAP and MISSING symbols must each be one character.")
-    if gap == missing:
+    gap_upper = gap.upper()
+    missing_upper = missing.upper()
+    if gap_upper == missing_upper:
         raise NexusFormatError("GAP and MISSING symbols must differ.")
+    if gap_upper in _IUPAC or missing_upper in _IUPAC:
+        raise NexusFormatError(
+            "GAP and MISSING symbols must not overlap supported nucleotide/IUPAC symbols."
+        )
     return gap, missing, symbols
 
 
@@ -219,6 +234,10 @@ def read_transposed_nexus(path: str | Path) -> Alignment:
     source = Path(path)
     try:
         raw = source.read_text(encoding="utf-8-sig")
+    except UnicodeError as exc:
+        raise NexusFormatError(
+            f"Could not decode NEXUS file {source} as UTF-8: {exc}"
+        ) from exc
     except OSError as exc:
         raise NexusFormatError(f"Could not read NEXUS file {source}: {exc}") from exc
 
