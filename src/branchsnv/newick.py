@@ -31,28 +31,54 @@ class _Parser:
         return Tree(root=root)
 
     def _parse_subtree(self) -> Node:
+        """Parse one subtree without using Python recursion."""
+
         self._skip_space_and_comments()
-        if self._peek() == "(":
-            self.index += 1
-            children = [self._parse_subtree()]
+        if self._peek() != "(":
+            name = self._parse_required_label()
+            length = self._parse_optional_length()
+            return Node(name=name, length=length)
+
+        child_stack: list[list[Node]] = []
+        expect_subtree = True
+
+        while True:
             self._skip_space_and_comments()
-            while self._peek() == ",":
+            current = self._peek()
+
+            if expect_subtree:
+                if current == "(":
+                    self.index += 1
+                    child_stack.append([])
+                    continue
+
+                name = self._parse_required_label()
+                length = self._parse_optional_length()
+                child_stack[-1].append(Node(name=name, length=length))
+                expect_subtree = False
+                continue
+
+            if current == ",":
                 self.index += 1
-                children.append(self._parse_subtree())
-                self._skip_space_and_comments()
-            if self._peek() != ")":
+                expect_subtree = True
+                continue
+
+            if current != ")":
                 raise self._error("Expected ')' to close an internal node")
+
             self.index += 1
+            children = child_stack.pop()
             name = self._parse_optional_label()
             length = self._parse_optional_length()
             node = Node(name=name, length=length, children=children)
             for child in children:
                 child.parent = node
-            return node
 
-        name = self._parse_required_label()
-        length = self._parse_optional_length()
-        return Node(name=name, length=length)
+            if not child_stack:
+                return node
+
+            child_stack[-1].append(node)
+            expect_subtree = False
 
     def _parse_required_label(self) -> str:
         label = self._parse_optional_label()
@@ -394,29 +420,43 @@ def reroot_on_outgroup(tree: Tree, outgroup: set[str]) -> Tree:
 
     new_root = Node()
 
-    def orient(current: Node, previous: Node | None, incoming_length: float | None) -> Node:
-        clone = Node(name=current.name, length=incoming_length)
-        neighbours = [item for item in adjacency[current] if item[0] is not previous]
-        # Deterministic ordering based on the smallest descendant tip reachable
-        # through each neighbour in the undirected graph.
-        def side_key(item: tuple[Node, float | None]) -> str:
-            neighbour, _ = item
-            stack = [(neighbour, current)]
-            names: list[str] = []
-            while stack:
-                node, parent = stack.pop()
-                if node.is_tip and node.name is not None:
-                    names.append(node.name)
-                for next_node, _length in adjacency[node]:
-                    if next_node is not parent:
-                        stack.append((next_node, node))
-            return min(names)
+    def orient(start: Node, previous: Node | None, incoming_length: float | None) -> Node:
+        """Clone and orient one side of an edge without recursive calls."""
 
-        for neighbour, length in sorted(neighbours, key=side_key):
-            child = orient(neighbour, current, length)
-            child.parent = clone
-            clone.children.append(child)
-        return clone
+        root_clone = Node(name=start.name, length=incoming_length)
+        stack: list[tuple[Node, Node | None, Node]] = [(start, previous, root_clone)]
+
+        while stack:
+            current, parent, clone = stack.pop()
+            neighbours = [item for item in adjacency[current] if item[0] is not parent]
+
+            # Deterministic ordering based on the smallest tip reachable through
+            # each neighbour in the undirected graph.
+            def side_key(item: tuple[Node, float | None]) -> str:
+                neighbour, _ = item
+                pending = [(neighbour, current)]
+                minimum: str | None = None
+                while pending:
+                    node, previous_node = pending.pop()
+                    if node.is_tip and node.name is not None:
+                        if minimum is None or node.name < minimum:
+                            minimum = node.name
+                    for next_node, _length in adjacency[node]:
+                        if next_node is not previous_node:
+                            pending.append((next_node, node))
+                assert minimum is not None
+                return minimum
+
+            ordered = sorted(neighbours, key=side_key)
+            children: list[tuple[Node, Node, Node]] = []
+            for neighbour, length in ordered:
+                child_clone = Node(name=neighbour.name, length=length, parent=clone)
+                clone.children.append(child_clone)
+                children.append((neighbour, current, child_clone))
+
+            stack.extend(reversed(children))
+
+        return root_clone
 
     left = orient(endpoint_a, endpoint_b, half)
     right = orient(endpoint_b, endpoint_a, half)

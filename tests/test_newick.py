@@ -22,6 +22,24 @@ class NewickTests(unittest.TestCase):
         self.assertEqual(tree.root.name, "root")
         self.assertEqual(len(tree.root.children), 3)
 
+    def test_parses_deep_pectinate_tree_without_python_recursion(self) -> None:
+        text = "t0"
+        for index in range(1, 1500):
+            text = f"({text},t{index})"
+        tree = parse_newick(text + ";")
+        self.assertEqual(len(tree.tips()), 1500)
+
+    def test_reroots_deep_pectinate_tree_without_python_recursion(self) -> None:
+        text = "t0"
+        for index in range(1, 1500):
+            text = f"({text},t{index})"
+        tree = parse_newick(text + ";")
+        rooted = reroot_on_outgroup(tree, {"t0"})
+        self.assertEqual(len(rooted.tips()), 1500)
+        descendants = descendant_tip_map(rooted)
+        root_sides = {frozenset(descendants[child]) for child in rooted.root.children}
+        self.assertIn(frozenset({"t0"}), root_sides)
+
     def test_rejects_duplicate_tips(self) -> None:
         with self.assertRaisesRegex(NewickFormatError, "Duplicate tree tip"):
             parse_newick("(A:1,A:2);")
