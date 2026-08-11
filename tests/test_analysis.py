@@ -63,6 +63,38 @@ class AnalysisTests(unittest.TestCase):
         )
         self.assertNotIn("ref_1", {result.site_id for result in summary.results})
 
+
+    def test_change_state_ambiguous_is_reported_explicitly(self) -> None:
+        from branchsnv.models import Alignment, Site
+
+        alignment = Alignment(
+            path=self.alignment.path,
+            taxa=self.alignment.taxa,
+            sites=(Site(site_id="ambiguous", states="CRRCC", input_row=1),),
+            ntax=self.alignment.ntax,
+            nchar=1,
+            gap=self.alignment.gap,
+            missing=self.alignment.missing,
+            symbols=self.alignment.symbols,
+        )
+        hidden = analyse_branch(
+            alignment, self.tree, self.branch, mode="parsimony", include_ambiguous=False
+        )
+        shown = analyse_branch(
+            alignment, self.tree, self.branch, mode="parsimony", include_ambiguous=True
+        )
+
+        self.assertEqual(hidden.change_state_ambiguous_sites, 1)
+        self.assertEqual(hidden.reported_sites, 0)
+        self.assertEqual(shown.change_state_ambiguous_sites, 1)
+        self.assertEqual(shown.reported_sites, 1)
+        result = shown.results[0]
+        self.assertEqual(result.parsimony_status, "change_state_ambiguous")
+        self.assertEqual(result.parent_states, "C")
+        self.assertEqual(result.child_states, "A|G")
+        self.assertEqual(result.possible_pairs, "C>A|C>G")
+        self.assertEqual(result.change, "C>A|C>G")
+
     def test_ambiguous_option_reports_ambiguous_parsimony_sites(self) -> None:
         summary = analyse_branch(
             self.alignment, self.tree, self.branch, mode="parsimony", include_ambiguous=True

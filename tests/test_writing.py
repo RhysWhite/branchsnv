@@ -10,6 +10,20 @@ from branchsnv.writing import AtomicOutputSet
 
 
 class AtomicOutputSetTests(unittest.TestCase):
+
+    def test_rejects_output_path_aliases(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "results.tsv"
+            alias = root / "nested" / ".." / "results.tsv"
+
+            with self.assertRaisesRegex(ValidationError, "Output paths must be distinct"):
+                with AtomicOutputSet([target, alias]):
+                    pass
+
+            self.assertFalse(target.exists())
+            self.assertFalse((root / "nested").exists())
+
     def test_existing_later_target_does_not_leak_temporary_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

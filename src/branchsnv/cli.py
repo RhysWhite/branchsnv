@@ -35,6 +35,8 @@ from .writing import (
 def _read_name_file(path: Path) -> set[str]:
     try:
         lines = path.read_text(encoding="utf-8-sig").splitlines()
+    except UnicodeError as exc:
+        raise SelectionError(f"Could not decode taxon list {path} as UTF-8: {exc}") from exc
     except OSError as exc:
         raise SelectionError(f"Could not read taxon list {path}: {exc}") from exc
     names: list[str] = []

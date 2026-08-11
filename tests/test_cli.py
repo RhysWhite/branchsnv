@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stderr
 from pathlib import Path
 
-from branchsnv.cli import main
+from branchsnv.cli import _read_name_file, main
+from branchsnv.errors import SelectionError
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -67,6 +70,57 @@ class CliTests(unittest.TestCase):
             self.assertFalse((root / "results.tsv").exists())
             self.assertFalse((root / "members.txt").exists())
             self.assertFalse((root / "report.json").exists())
+
+
+    def test_name_file_allows_comments_blank_lines_and_outer_whitespace(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "names.txt"
+            path.write_text("# comment\n\n  A  \nB\n", encoding="utf-8-sig")
+            self.assertEqual(_read_name_file(path), {"A", "B"})
+
+    def test_name_file_rejects_empty_content(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "names.txt"
+            path.write_text("# comment only\n\n", encoding="utf-8")
+            with self.assertRaisesRegex(SelectionError, "contains no names"):
+                _read_name_file(path)
+
+    def test_name_file_rejects_duplicates(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "names.txt"
+            path.write_text("A\nB\nA\n", encoding="utf-8")
+            with self.assertRaisesRegex(SelectionError, r"duplicate name\(s\): A"):
+                _read_name_file(path)
+
+    def test_non_utf8_name_file_is_user_facing_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            bad_names = root / "bad_names.txt"
+            bad_names.write_bytes(b"A\n\xff\n")
+            stderr = io.StringIO()
+            with redirect_stderr(stderr):
+                code = main(
+                    [
+                        "find",
+                        "--alignment",
+                        str(FIXTURES / "simple.nex"),
+                        "--tree",
+                        str(FIXTURES / "simple.nwk"),
+                        "--outgroup",
+                        "Outgroup",
+                        "--clade-tips",
+                        str(bad_names),
+                        "--output",
+                        str(root / "results.tsv"),
+                        "--members-output",
+                        str(root / "members.txt"),
+                        "--report",
+                        str(root / "report.json"),
+                    ]
+                )
+            self.assertEqual(code, 2)
+            self.assertIn("Could not decode taxon list", stderr.getvalue())
+            self.assertIn("as UTF-8", stderr.getvalue())
 
     def test_find_outputs_are_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as first_directory, tempfile.TemporaryDirectory() as second_directory:
