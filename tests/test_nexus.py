@@ -237,6 +237,82 @@ END;
                 with self.assertRaises(NexusFormatError):
                     read_transposed_nexus(path)
 
+    def test_rejects_explicit_non_nucleotide_datatype(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bad.nex"
+            for datatype in ("PROTEIN", "STANDARD", "RNA"):
+                with self.subTest(datatype=datatype):
+                    text = f"""#NEXUS
+                    BEGIN DATA;
+                    DIMENSIONS NTAX=2 NCHAR=1;
+                    FORMAT DATATYPE={datatype} TRANSPOSE SYMBOLS='ACGT';
+                    TAXLABELS A B;
+                    MATRIX site_1 A C;
+                    END;
+                    """
+                    path.write_text(text, encoding="utf-8")
+                    with self.assertRaisesRegex(NexusFormatError, "DATATYPE"):
+                        read_transposed_nexus(path)
+
+    def test_accepts_explicit_nucleotide_datatype(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "input.nex"
+            for datatype in ("DNA", "NUCLEOTIDE"):
+                with self.subTest(datatype=datatype):
+                    text = f"""#NEXUS
+                    BEGIN DATA;
+                    DIMENSIONS NTAX=2 NCHAR=1;
+                    FORMAT DATATYPE={datatype} TRANSPOSE SYMBOLS='ACGT';
+                    TAXLABELS A B;
+                    MATRIX site_1 A C;
+                    END;
+                    """
+                    path.write_text(text, encoding="utf-8")
+                    alignment = read_transposed_nexus(path)
+                    self.assertEqual(alignment.sites[0].states, "AC")
+
+    def test_rejects_empty_taxon_and_site_labels(self) -> None:
+        empty_taxon = """#NEXUS
+        BEGIN DATA;
+        DIMENSIONS NTAX=2 NCHAR=1;
+        FORMAT TRANSPOSE SYMBOLS='ACGT';
+        TAXLABELS '' B;
+        MATRIX site_1 A C;
+        END;
+        """
+        empty_site = """#NEXUS
+        BEGIN DATA;
+        DIMENSIONS NTAX=2 NCHAR=1;
+        FORMAT TRANSPOSE SYMBOLS='ACGT';
+        TAXLABELS A B;
+        MATRIX '' A C;
+        END;
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bad.nex"
+            path.write_text(empty_taxon, encoding="utf-8")
+            with self.assertRaisesRegex(NexusFormatError, "Taxon labels must not be empty"):
+                read_transposed_nexus(path)
+            path.write_text(empty_site, encoding="utf-8")
+            with self.assertRaisesRegex(NexusFormatError, "empty site identifier"):
+                read_transposed_nexus(path)
+
+    def test_rejects_line_breaks_in_taxon_labels(self) -> None:
+        text = """#NEXUS
+        BEGIN DATA;
+        DIMENSIONS NTAX=2 NCHAR=1;
+        FORMAT TRANSPOSE SYMBOLS='ACGT';
+        TAXLABELS 'A
+B' C;
+        MATRIX site_1 A C;
+        END;
+        """
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bad.nex"
+            path.write_text(text, encoding="utf-8")
+            with self.assertRaisesRegex(NexusFormatError, "line breaks"):
+                read_transposed_nexus(path)
+
 
 if __name__ == "__main__":
     unittest.main()

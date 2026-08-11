@@ -161,6 +161,14 @@ def _parse_dimensions(command: str) -> tuple[int, int]:
 
 
 def _parse_format(command: str) -> tuple[str, str, str]:
+    datatype_match = re.search(r"\bdatatype\s*=\s*([^\s]+)", command, re.IGNORECASE)
+    if datatype_match is not None:
+        datatype = _unquote(datatype_match.group(1)).upper()
+        if datatype not in {"DNA", "NUCLEOTIDE"}:
+            raise NexusFormatError(
+                f"Unsupported FORMAT DATATYPE {datatype!r}; BRANCHSNV requires nucleotide data."
+            )
+
     transpose_match = re.search(
         r"\btranspose\b(?:\s*=\s*([^\s]+))?", command, re.IGNORECASE
     )
@@ -292,6 +300,10 @@ def read_transposed_nexus(path: str | Path) -> Alignment:
         raise NexusFormatError(
             f"TAXLABELS contains {len(taxa)} names, but NTAX declares {ntax}."
         )
+    if any(name == "" for name in taxa):
+        raise NexusFormatError("Taxon labels must not be empty.")
+    if any("\n" in name or "\r" in name for name in taxa):
+        raise NexusFormatError("Taxon labels must not contain line breaks.")
     duplicates = sorted(name for name, count in Counter(taxa).items() if count > 1)
     if duplicates:
         preview = ", ".join(duplicates[:5])
@@ -310,6 +322,10 @@ def read_transposed_nexus(path: str | Path) -> Alignment:
                 f"Matrix row near line {matrix_line + offset} must contain a site label and states."
             )
         site_id = tokens[0]
+        if not site_id:
+            raise NexusFormatError(
+                f"Matrix row near line {matrix_line + offset} has an empty site identifier."
+            )
         if site_id in site_ids:
             raise NexusFormatError(f"Duplicate matrix site identifier: {site_id}.")
         states = _normalise_states(tokens[1:], ntax, len(sites) + 1)

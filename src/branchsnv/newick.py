@@ -152,6 +152,8 @@ class _Parser:
             if node.is_tip:
                 if node.name is None:
                     raise NewickFormatError("Every tip must have a label.")
+                if "\n" in node.name or "\r" in node.name:
+                    raise NewickFormatError("Tree tip labels must not contain line breaks.")
                 tip_names.append(node.name)
             elif len(node.children) < 2:
                 raise NewickFormatError("Internal Newick nodes must have at least two children.")
@@ -179,6 +181,10 @@ def read_newick(path: str | Path) -> Tree:
     source = Path(path)
     try:
         text = source.read_text(encoding="utf-8-sig")
+    except UnicodeError as exc:
+        raise NewickFormatError(
+            f"Could not decode Newick file {source} as UTF-8: {exc}"
+        ) from exc
     except OSError as exc:
         raise NewickFormatError(f"Could not read Newick file {source}: {exc}") from exc
     if not text.strip():
@@ -217,6 +223,8 @@ def branch_records(tree: Tree) -> list[BranchRecord]:
         if node is tree.root:
             continue
         tips = descendants[node]
+        if any("\n" in tip or "\r" in tip for tip in tips):
+            raise ValidationError("Tree tip labels must not contain line breaks.")
         digest = sha256_lines(tips)
         branch_id = f"b_{digest}"
         if branch_id in full_ids:

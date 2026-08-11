@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
 
 from branchsnv.errors import NewickFormatError, ValidationError
+from branchsnv.models import Node, Tree
 from branchsnv.newick import (
     branch_records,
     descendant_tip_map,
     parse_newick,
+    read_newick,
     reroot_on_outgroup,
 )
 
@@ -48,6 +52,26 @@ class NewickTests(unittest.TestCase):
         tree = parse_newick("(O,((A,B),(C,D)));")
         with self.assertRaisesRegex(ValidationError, "not monophyletic"):
             reroot_on_outgroup(tree, {"A", "C"})
+
+    def test_branch_records_defensively_reject_line_breaks(self) -> None:
+        left = Node(name="A\nB")
+        right = Node(name="C")
+        root = Node(children=[left, right])
+        left.parent = root
+        right.parent = root
+        with self.assertRaisesRegex(ValidationError, "line breaks"):
+            branch_records(Tree(root=root))
+
+    def test_reports_non_utf8_input_as_newick_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bad.nwk"
+            path.write_bytes(b"(A,\xff);")
+            with self.assertRaisesRegex(NewickFormatError, "UTF-8"):
+                read_newick(path)
+
+    def test_rejects_line_breaks_in_tip_labels(self) -> None:
+        with self.assertRaisesRegex(NewickFormatError, "line breaks"):
+            parse_newick("('A\nB',C);")
 
 
 if __name__ == "__main__":
