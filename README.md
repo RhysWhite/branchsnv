@@ -267,8 +267,13 @@ macOS and Windows jobs in GitHub Actions.
 
 The independent **publication-validation repository** is maintained separately
 at [RhysWhite/branchsnv-validation](https://github.com/RhysWhite/branchsnv-validation).
-Its committed publication snapshot is a version-pinned historical record for
-**BRANCHSNV v0.1.0a1** and records:
+It preserves two version-pinned records:
+
+- the historical publication snapshot for **BRANCHSNV v0.1.0a1**; and
+- a separate stable-release validation record for **BRANCHSNV v0.1.0** under
+  `release_validation/v0.1.0/`.
+
+Both records support the same deterministic analytical headline results:
 
 | Validation layer | Result |
 |---|---|
@@ -279,20 +284,21 @@ Its committed publication snapshot is a version-pinned historical record for
 | Complete-phylogeny empirical analysis | 31,644 informative comparisons across five phylogenies; 827 (2.61%) fell outside the fixed-exclusive/unambiguous-substitution intersection |
 | Scalability | 39/39 measured end-to-end command-line runs completed |
 
-The validation repository stores machine-readable result snapshots, input and
-result checksums, production-source hashes, experiment code, and a top-level
-integrity checker. From a checkout of that repository:
+The stable v0.1.0 run was generated against production commit
+`71b055bdbd8e00ee63afda136b88892aee0062f8` using validation-framework commit
+`cfb07389191540ca57c9e822b254c279ab903f36`. It verified the production
+source identity for all 13 Python source files, the validation-script identity,
+the Experiments 01–06 pass criteria, and exact reproduction of the deterministic
+analytical outputs in the canonical scientific snapshot. Experiment 04
+performance measurements are retained as environment-specific observations.
 
-```bash
-python verify_publication_snapshot.py
-```
-
-should report `PUBLICATION SNAPSHOT: PASS` for the committed publication
-snapshot.
+At validation-repository commit `35a0794ddd9782355e1e06dd95bd10e1cde4c735`,
+the stable record is checksum-gated and checked in CI. The historical snapshot
+remains separately verifiable with `verify_publication_snapshot.py`.
 
 The older [`validation/ak3/`](validation/ak3/) directory in this repository is
 retained as a checksum-gated working-data regression recipe. It is **not** the
-authoritative publication-validation record.
+authoritative independent validation record.
 
 See [`VALIDATION_REPORT.md`](VALIDATION_REPORT.md) and
 [`docs/validation.md`](docs/validation.md) for details.

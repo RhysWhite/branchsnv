@@ -2,7 +2,9 @@
 
 **Production software version:** 0.1.0
 
-**Committed publication-validation snapshot:** 0.1.0a1 (historical)
+**Historical publication-validation snapshot:** 0.1.0a1
+
+**Stable v0.1.0 release-validation record:** PASS (validation repository `35a0794ddd9782355e1e06dd95bd10e1cde4c735`)
 
 BRANCHSNV uses two complementary validation layers:
 
@@ -56,11 +58,21 @@ The installed command reproduces the committed simple example:
 GitHub Actions compares the generated `results.tsv`, `members.txt`, and
 `report.json` with the committed expected files.
 
-## Publication-validation snapshot
+## Independent validation records
 
-The separate publication-validation repository contains six experiment layers.
-Its currently committed snapshot is a version-pinned historical record for
-BRANCHSNV v0.1.0a1 and verifies the following headline results:
+The separate publication-validation repository contains six experiment layers
+and preserves two version-pinned records. The historical publication snapshot
+evaluates BRANCHSNV v0.1.0a1. A separate stable v0.1.0 release-validation record
+archives a fresh run against production commit `71b055bdbd8e00ee63afda136b88892aee0062f8`
+using validation-framework commit `cfb07389191540ca57c9e822b254c279ab903f36`.
+
+The stable run completed with `REPRODUCED RESULTS: PASS`: production source
+identity was verified for all 13 Python source files, validation-script identity
+was verified, deterministic analytical outputs matched the canonical scientific
+snapshot exactly, Experiments 01–06 met their exact pass criteria, and the
+Experiment 04 protocol contained 3 repetitions and 39 measured runs.
+
+The two records support the following headline results:
 
 | Experiment | Result |
 |---|---|
@@ -74,22 +86,24 @@ BRANCHSNV v0.1.0a1 and verifies the following headline results:
 For the 675 unambiguous focal-edge substitutions that were not fixed-exclusive,
 645 (95.56%) had the derived nucleotide elsewhere in the same phylogeny.
 
-The snapshot is integrity-gated with SHA-256 manifests. From the validation
-repository root:
+The historical snapshot remains integrity-gated with SHA-256 manifests:
 
 ```bash
 python verify_publication_snapshot.py
 ```
 
-returns:
+returns `PUBLICATION SNAPSHOT: PASS`.
 
-```text
-PUBLICATION SNAPSHOT: PASS
-```
+The stable v0.1.0 record is stored under `release_validation/v0.1.0/` and
+contains all 47 generated result files, a checksum manifest, and machine-readable
+record metadata. At validation-repository commit
+`35a0794ddd9782355e1e06dd95bd10e1cde4c735`, CI verifies the archived result
+checksums and provenance and independently rechecks the archived scientific
+outputs with `verify_reproduced_results.py`.
 
-The production-source SHA-256 hashes recorded by the validation snapshot for
-`analysis.py` and `parsimony.py` match the corresponding files in the historical
-v0.1.0a1 production snapshot.
+The historical snapshot retains the v0.1.0a1 production-source hashes. The
+stable record separately records the successful source-identity check against
+production commit `71b055bdbd8e00ee63afda136b88892aee0062f8`.
 
 ## Packaging and installed-package checks
 
@@ -111,5 +125,6 @@ checksum-gated working-data regression recipe. It is useful for guarding
 against changes in behaviour on those exact development inputs, but it is no
 longer the primary evidence supporting BRANCHSNV's scientific validation.
 
-The authoritative manuscript-associated validation record is the separate
-`branchsnv-validation` repository.
+The authoritative independent validation records are maintained in the separate
+`branchsnv-validation` repository: the historical publication snapshot and the
+version-pinned stable v0.1.0 release-validation record.

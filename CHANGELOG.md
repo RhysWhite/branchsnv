@@ -18,13 +18,16 @@ and release identifiers follow PEP 440 conventions.
 ### Changed
 
 - Reframed repository validation documentation around the independent
-  `branchsnv-validation` publication framework and its six committed experiment
-  layers, while distinguishing the historical v0.1.0a1 publication snapshot from
-  validation of the current release candidate.
+  `branchsnv-validation` framework and its six experiment layers, distinguishing
+  the historical v0.1.0a1 publication snapshot from the separately archived
+  stable v0.1.0 release-validation record.
 - Tightened the JSON report schema so rooting, branch-selection, and analysis
   parameter provenance must match forms BRANCHSNV can actually emit.
 - Updated release guidance so stable releases are validated against the exact
   release candidate before downstream packaging.
+- Recorded the independent stable v0.1.0 validation outcome: source and
+  validation-script identity verified, deterministic analytical outputs exactly
+  reproduced, and all six experiment layers passed.
 - Removed the obsolete development-only GitHub setup document from the public
   source package.
 

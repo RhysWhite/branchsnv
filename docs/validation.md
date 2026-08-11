@@ -8,8 +8,8 @@ production repository contains development-facing tests and regression checks.
 The independent publication-validation framework is maintained at
 [RhysWhite/branchsnv-validation](https://github.com/RhysWhite/branchsnv-validation)
 and records the analyses supporting the manuscript-level validation claims.
-The committed publication snapshot described below is retained as a version-pinned
-historical record for BRANCHSNV v0.1.0a1.
+It preserves the historical BRANCHSNV v0.1.0a1 publication snapshot and a
+separate stable v0.1.0 release-validation record.
 
 ## Production test suite
 
@@ -48,10 +48,18 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 
 The separate publication-validation repository exists so that independent
 or deliberately incorrect validation implementations cannot alter the
-production code being tested. The currently committed publication snapshot
-evaluates BRANCHSNV v0.1.0a1; it is a historical snapshot rather than a claim
-that the current 0.1.0 release candidate has already been independently
-revalidated.
+production code being tested. Its historical publication snapshot evaluates
+BRANCHSNV v0.1.0a1.
+
+A separate stable-release run evaluated BRANCHSNV v0.1.0 at production commit
+`71b055bdbd8e00ee63afda136b88892aee0062f8` using validation-framework commit
+`cfb07389191540ca57c9e822b254c279ab903f36`. The run completed with
+`REPRODUCED RESULTS: PASS`, including verified production-source identity for
+13 Python files, verified validation-script identity, exact reproduction of the
+deterministic analytical outputs in the canonical scientific snapshot, and all
+Experiments 01–06 exact pass criteria. The complete run is archived under
+`release_validation/v0.1.0/` and protected at validation-repository commit
+`35a0794ddd9782355e1e06dd95bd10e1cde4c735`.
 
 The six validation and empirical-analysis layers are:
 
@@ -123,33 +131,39 @@ phylogeny.
 
 ### 6. Scalability
 
-The committed benchmark contains 39 measured command-line invocations spanning
-taxon scaling, site scaling, and analysis-mode comparisons. All 39 runs
-completed. Runtime and peak resident memory were approximately linear over the
-tested taxon and site ranges.
+The historical benchmark contains 39 measured command-line invocations spanning
+taxon scaling, site scaling, and analysis-mode comparisons. The stable v0.1.0
+validation run repeated the same 39-run protocol and all 39 runs completed.
+Runtime and peak resident memory were approximately linear over the tested taxon
+and site ranges. Benchmark timings and memory measurements are environment-
+specific and are retained as observations rather than byte-stable outputs.
 
-## Snapshot integrity and production-source identity
+## Snapshot and stable-record integrity
 
 The publication-validation repository stores machine-readable result snapshots,
-input and result checksums, and hashes of the production source files used by
-its experiments.
+input and result checksums, source identity records, and the experiment code
+used to generate the results.
 
-From the validation repository root:
+The historical publication snapshot remains verifiable with:
 
 ```bash
 python verify_publication_snapshot.py
 ```
 
-verifies the committed empirical inputs, result checksums, and headline claims.
-The committed snapshot reports:
+and reports `PUBLICATION SNAPSHOT: PASS`.
 
-```text
-PUBLICATION SNAPSHOT: PASS
-```
+The stable v0.1.0 record contains 47 generated result files under
+`release_validation/v0.1.0/results/`, together with `checksums.sha256` and
+`record.json`. Its integrity is checked with
+`verify_release_validation_record.py`, while `verify_reproduced_results.py`
+independently checks the archived scientific outputs and Experiments 01–06 pass
+criteria. These checks are run in validation-repository CI at commit
+`35a0794ddd9782355e1e06dd95bd10e1cde4c735`.
 
-The production `analysis.py` and `parsimony.py` hashes recorded by the
-publication-validation snapshot match the corresponding files in the historical
-v0.1.0a1 production snapshot.
+The historical snapshot retains the v0.1.0a1 source hashes. The stable record
+separately records the successful source-identity verification against
+production commit `71b055bdbd8e00ee63afda136b88892aee0062f8` and validation-framework
+commit `cfb07389191540ca57c9e822b254c279ab903f36`.
 
 ## Bundled example and package validation
 
@@ -168,6 +182,7 @@ software users install is usable and contains the expected package metadata.
 repository. It records checksum-gated working files and expected outputs for two
 branches in an MRSA AK3 working dataset.
 
-It remains useful as a permanent regression fixture, but it is **not** the
-authoritative publication-validation record. The publication claims are tied to
-the separate `branchsnv-validation` repository described above.
+It remains useful as a permanent regression fixture, but it is **not** an
+authoritative independent validation record. The historical publication snapshot
+and the stable v0.1.0 release-validation record are maintained in the separate
+`branchsnv-validation` repository described above.
