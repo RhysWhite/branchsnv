@@ -179,8 +179,9 @@ branchsnv inspect \
 ```
 
 A branch ID is derived from the SHA-256 hash of its sorted exact descendant-tip
-names. It is unaffected by sibling order or branch lengths, but intentionally
-changes when rooting or descendant membership changes.
+names. It is unaffected by sibling order, branch lengths, or Newick formatting
+outside taxon labels, but exact taxon-name content is significant. It
+intentionally changes when rooting or descendant membership changes.
 
 See [`docs/branch-selection.md`](docs/branch-selection.md) for details.
 
@@ -229,7 +230,7 @@ By default, parsimony mode reports only `unambiguous_change`. Add
 
 ## Input scope
 
-The current alpha supports one transposed nucleotide `DATA` or `CHARACTERS`
+BRANCHSNV 0.1.0 supports one transposed nucleotide `DATA` or `CHARACTERS`
 NEXUS block and one Newick tree with unique exact tip names. It supports quoted
 labels, comments, branch lengths, multifurcations, standard IUPAC ambiguity
 codes, and declared missing and gap symbols.
@@ -261,12 +262,13 @@ Production tests and publication validation are deliberately separated.
 
 The **production repository** contains the unit, regression, determinism,
 packaging, and bundled-example checks used during development. The current test
-suite contains **42 tests** and is run across Python 3.10–3.14, with additional
+suite contains **72 tests** and is run across Python 3.10–3.14, with additional
 macOS and Windows jobs in GitHub Actions.
 
 The independent **publication-validation repository** is maintained separately
 at [RhysWhite/branchsnv-validation](https://github.com/RhysWhite/branchsnv-validation).
-Its committed snapshot evaluates **BRANCHSNV v0.1.0a1** and currently records:
+Its committed publication snapshot is a version-pinned historical record for
+**BRANCHSNV v0.1.0a1** and records:
 
 | Validation layer | Result |
 |---|---|

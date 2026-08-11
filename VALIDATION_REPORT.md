@@ -1,6 +1,8 @@
 # BRANCHSNV validation overview
 
-**Software version:** 0.1.0a1
+**Production software version:** 0.1.0
+
+**Committed publication-validation snapshot:** 0.1.0a1 (historical)
 
 BRANCHSNV uses two complementary validation layers:
 
@@ -13,7 +15,7 @@ implementations from sharing or modifying the production reconstruction logic.
 
 ## Production test suite
 
-The current production suite passes **42/42 tests**.
+The current production suite passes **72/72 tests**.
 
 It covers:
 
@@ -57,8 +59,8 @@ GitHub Actions compares the generated `results.tsv`, `members.txt`, and
 ## Publication-validation snapshot
 
 The separate publication-validation repository contains six experiment layers.
-Its committed snapshot evaluates BRANCHSNV v0.1.0a1 and verifies the following
-headline results:
+Its currently committed snapshot is a version-pinned historical record for
+BRANCHSNV v0.1.0a1 and verifies the following headline results:
 
 | Experiment | Result |
 |---|---|
@@ -86,7 +88,7 @@ PUBLICATION SNAPSHOT: PASS
 ```
 
 The production-source SHA-256 hashes recorded by the validation snapshot for
-`analysis.py` and `parsimony.py` match the corresponding files in this
+`analysis.py` and `parsimony.py` match the corresponding files in the historical
 v0.1.0a1 production snapshot.
 
 ## Packaging and installed-package checks

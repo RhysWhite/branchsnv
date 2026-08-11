@@ -34,9 +34,11 @@ as one UTF-8 line per name. The branch identifier is:
 b_<SHA-256 of sorted descendant lines>
 ```
 
-This identifier is invariant to sibling order, whitespace, comments, internal
-labels, and branch lengths. It can change when taxon membership or rooting
-changes, which is intentional.
+This identifier is invariant to sibling order, Newick formatting whitespace
+outside labels, comments, internal-node labels, and branch lengths. Whitespace
+that is part of a quoted taxon label is part of the taxon name and therefore
+affects the identifier. The identifier can also change when taxon membership or
+rooting changes, which is intentional.
 
 ## 4. Fixed-exclusive analysis
 

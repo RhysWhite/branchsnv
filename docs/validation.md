@@ -8,10 +8,12 @@ production repository contains development-facing tests and regression checks.
 The independent publication-validation framework is maintained at
 [RhysWhite/branchsnv-validation](https://github.com/RhysWhite/branchsnv-validation)
 and records the analyses supporting the manuscript-level validation claims.
+The committed publication snapshot described below is retained as a version-pinned
+historical record for BRANCHSNV v0.1.0a1.
 
 ## Production test suite
 
-The current production suite contains 42 standard-library tests. GitHub Actions
+The current production suite contains 72 standard-library tests. GitHub Actions
 runs the suite on Python 3.10, 3.11, 3.12, 3.13, and 3.14 on Linux, with
 additional Python 3.14 jobs on macOS and Windows.
 
@@ -46,8 +48,10 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 
 The separate publication-validation repository exists so that independent
 or deliberately incorrect validation implementations cannot alter the
-production code being tested. Its committed publication snapshot evaluates
-BRANCHSNV v0.1.0a1.
+production code being tested. The currently committed publication snapshot
+evaluates BRANCHSNV v0.1.0a1; it is a historical snapshot rather than a claim
+that the current 0.1.0 release candidate has already been independently
+revalidated.
 
 The six validation and empirical-analysis layers are:
 
@@ -144,8 +148,8 @@ PUBLICATION SNAPSHOT: PASS
 ```
 
 The production `analysis.py` and `parsimony.py` hashes recorded by the
-publication-validation snapshot match the corresponding v0.1.0a1 files in this
-repository.
+publication-validation snapshot match the corresponding files in the historical
+v0.1.0a1 production snapshot.
 
 ## Bundled example and package validation
 

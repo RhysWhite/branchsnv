@@ -33,8 +33,10 @@ branchsnv inspect ... --output branches.tsv
 branchsnv find ... --branch-id b_0123456789abcdef
 ```
 
-The ID hashes the sorted exact descendants. A prefix is accepted only when it
-matches one branch uniquely.
+The ID hashes the sorted exact descendant names. It is invariant to sibling
+order and Newick formatting outside taxon labels, but exact taxon-name content
+—including internal spaces in quoted labels—is significant. A prefix is
+accepted only when it matches one branch uniquely.
 
 Descendant count alone is not a safe branch selector. Multiple branches can
 have the same number of descendants, and counts do not record which taxa are
