@@ -21,6 +21,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref }}
+          fetch-depth: 0
 
       - uses: actions/setup-python@v7
         with:
@@ -37,6 +40,13 @@ jobs:
           RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
         run: |
           set -euo pipefail
+
+          checked_out_commit=$(git rev-parse HEAD)
+          tagged_commit=$(git rev-parse "$RELEASE_TAG^{commit}")
+          if [[ "$checked_out_commit" != "$tagged_commit" ]]; then
+            echo "Checked-out commit $checked_out_commit does not match $RELEASE_TAG ($tagged_commit)." >&2
+            exit 1
+          fi
 
           python - "$RELEASE_TAG" <<'PY'
           import pathlib
@@ -142,6 +152,6 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: branchsnv-${{ github.ref_name }}-release-files
+          name: branchsnv-${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}-release-files
           path: dist/*
           if-no-files-found: error
