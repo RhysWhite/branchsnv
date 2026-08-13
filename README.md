@@ -8,6 +8,7 @@
 
 [![CI](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml/badge.svg)](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml/badge.svg)](https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21919038.svg)](https://doi.org/10.5281/zenodo.21919038)
 ![Python 3.10–3.14](https://img.shields.io/badge/Python-3.10%E2%80%933.14-3776AB?logo=python&logoColor=white)
 ![Runtime dependencies](https://img.shields.io/badge/runtime%20dependencies-0-2ea44f)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -262,11 +263,13 @@ Production tests and publication validation are deliberately separated.
 
 The **production repository** contains the unit, regression, determinism,
 packaging, and bundled-example checks used during development. The current test
-suite contains **72 tests** and is run across Python 3.10–3.14, with additional
+suite contains **73 tests** and is run across Python 3.10–3.14, with additional
 macOS and Windows jobs in GitHub Actions.
 
 The independent **publication-validation repository** is maintained separately
 at [RhysWhite/branchsnv-validation](https://github.com/RhysWhite/branchsnv-validation).
+The stable v0.1.0 validation release is archived at
+https://doi.org/10.5281/zenodo.21919067.
 It preserves two version-pinned records:
 
 - the historical publication snapshot for **BRANCHSNV v0.1.0a1**; and
@@ -346,8 +349,11 @@ BRANCHSNV was developed and is maintained by [Rhys White](https://github.com/Rhy
 
 ## Citation
 
-Citation metadata are provided in [`CITATION.cff`](CITATION.cff). A permanent
-archive DOI should be added after the first stable public release is archived.
+Citation metadata are provided in [`CITATION.cff`](CITATION.cff).
+
+BRANCHSNV v0.1.0 is permanently archived at
+https://doi.org/10.5281/zenodo.21919038. The corresponding publication-validation
+release is archived separately at https://doi.org/10.5281/zenodo.21919067.
 
 ## Licence
 
