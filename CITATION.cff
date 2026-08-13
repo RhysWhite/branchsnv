@@ -6,6 +6,7 @@ authors:
   - family-names: "White"
     given-names: "Rhys T."
 version: 0.1.0
+doi: "10.5281/zenodo.21919038"
 license: MIT
 repository-code: "https://github.com/RhysWhite/branchsnv"
 abstract: >-
