@@ -1,0 +1,165 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Immutable release tag to publish, for example v0.1.0"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build verified distributions
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.event.release.tag_name }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Resolve release tag
+        shell: bash
+        env:
+          MANUAL_TAG: ${{ inputs.release_tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            tag="${MANUAL_TAG}"
+          else
+            tag="${RELEASE_TAG}"
+          fi
+          printf 'RELEASE_TAG=%s\n' "$tag" >> "$GITHUB_ENV"
+
+      - name: Install source checkout and run tests
+        run: |
+          python -m pip install .
+          python -m unittest discover -s tests -v
+
+      - name: Verify tag and release metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          checked_out_commit=$(git rev-parse HEAD)
+          tagged_commit=$(git rev-parse "$RELEASE_TAG^{commit}")
+          if [[ "$checked_out_commit" != "$tagged_commit" ]]; then
+            echo "Checked-out commit $checked_out_commit does not match $RELEASE_TAG ($tagged_commit)." >&2
+            exit 1
+          fi
+
+          python - "$RELEASE_TAG" <<'PY'
+          import pathlib
+          import re
+          import sys
+
+          tag = sys.argv[1]
+          pyproject = pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
+          citation = pathlib.Path("CITATION.cff").read_text(encoding="utf-8")
+          init_text = pathlib.Path("src/branchsnv/__init__.py").read_text(
+              encoding="utf-8"
+          )
+
+          pyproject_version = re.search(
+              r'^version\s*=\s*"([^"]+)"\s*$',
+              pyproject,
+              flags=re.MULTILINE,
+          ).group(1)
+          citation_version = re.search(
+              r'^version:\s*"?([^"\s]+)"?\s*$',
+              citation,
+              flags=re.MULTILINE,
+          ).group(1)
+          package_version = re.search(
+              r'__version__\s*=\s*"([^"]+)"',
+              init_text,
+          ).group(1)
+
+          versions = {pyproject_version, citation_version, package_version}
+          assert len(versions) == 1, (
+              "Release metadata versions disagree: "
+              f"pyproject={pyproject_version}, "
+              f"citation={citation_version}, "
+              f"package={package_version}"
+          )
+
+          expected_tag = f"v{package_version}"
+          assert tag == expected_tag, (
+              f"Tag {tag!r} does not match expected tag {expected_tag!r}"
+          )
+
+          changelog = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
+          assert f"## [{package_version}]" in changelog, (
+              f"CHANGELOG.md has no release section for {package_version}"
+          )
+
+          print(f"Release metadata validated for {tag}.")
+          PY
+
+      - name: Build and inspect distributions
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
+          python -m twine check dist/*
+
+      - name: Install and validate wheel
+        shell: bash
+        run: |
+          set -euo pipefail
+          env_dir="$RUNNER_TEMP/branchsnv-pypi-wheel"
+          python -m venv "$env_dir"
+          "$env_dir/bin/python" -m pip install dist/*.whl
+          "$env_dir/bin/branchsnv" --version
+          "$env_dir/bin/python" scripts/validate_installed_package.py
+          "$env_dir/bin/python" -m pip check
+
+      - name: Install and validate source distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          env_dir="$RUNNER_TEMP/branchsnv-pypi-sdist"
+          python -m venv "$env_dir"
+          "$env_dir/bin/python" -m pip install dist/*.tar.gz
+          "$env_dir/bin/branchsnv" --version
+          "$env_dir/bin/python" scripts/validate_installed_package.py
+          "$env_dir/bin/python" -m pip check
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pypi-distributions-${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.event.release.tag_name }}
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error
+
+  publish:
+    name: Publish distributions
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/branchsnv
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: pypi-distributions-${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.event.release.tag_name }}
+          path: dist
+
+      - name: Publish to PyPI using trusted publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
