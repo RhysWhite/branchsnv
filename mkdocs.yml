@@ -1,0 +1,43 @@
+site_name: BRANCHSNV
+site_description: Exact branch-level SNV interrogation from rooted phylogenies and transposed NEXUS matrices
+site_url: https://branchsnv.readthedocs.io/
+repo_url: https://github.com/RhysWhite/branchsnv
+repo_name: RhysWhite/branchsnv
+edit_uri: edit/main/docs/
+
+theme:
+  name: readthedocs
+
+nav:
+  - Home: index.md
+  - Input formats: input-formats.md
+  - Branch selection: branch-selection.md
+  - Algorithm: algorithm.md
+  - Interpretation: interpretation.md
+  - Workflow integration: workflow-integration.md
+  - Validation: validation.md
+  - Code walkthrough:
+      - Overview: code-walkthrough/README.md
+      - v0.1.0a1:
+          - Overview: code-walkthrough/v0.1.0a1/README.md
+          - 00 — End-to-end execution map: code-walkthrough/v0.1.0a1/00-execution-map.md
+          - 01 — Entry points and CLI: code-walkthrough/v0.1.0a1/01-entry-points-and-cli.md
+          - 02 — Models, errors, and utilities: code-walkthrough/v0.1.0a1/02-models-errors-and-utilities.md
+          - 03 — Transposed NEXUS parser: code-walkthrough/v0.1.0a1/03-transposed-nexus-parser.md
+          - 04 — Newick parser: code-walkthrough/v0.1.0a1/04-newick-parser.md
+          - 05 — Tree operations, rooting, and selection: code-walkthrough/v0.1.0a1/05-tree-operations-rooting-and-selection.md
+          - 06 — Sankoff parsimony: code-walkthrough/v0.1.0a1/06-parsimony-reconstruction.md
+          - 07 — Branch analysis: code-walkthrough/v0.1.0a1/07-branch-analysis.md
+          - 08 — Validation, provenance, and writing: code-walkthrough/v0.1.0a1/08-validation-provenance-and-writing.md
+          - 09 — Test-to-code map: code-walkthrough/v0.1.0a1/09-test-to-code-map.md
+          - 10 — Maintenance observations: code-walkthrough/v0.1.0a1/10-maintenance-observations.md
+          - Source coverage: code-walkthrough/v0.1.0a1/SOURCE-COVERAGE.md
+          - QA report: code-walkthrough/v0.1.0a1/QA-REPORT.md
+
+markdown_extensions:
+  - fenced_code
+  - tables
+  - toc:
+      permalink: true
+
+strict: true

@@ -178,7 +178,7 @@ software users install is usable and contains the expected package metadata.
 
 ## Legacy AK3 working-data regression recipe
 
-[`validation/ak3/`](../validation/ak3/) predates the publication-validation
+[`validation/ak3/`](https://github.com/RhysWhite/branchsnv/tree/main/validation/ak3) predates the publication-validation
 repository. It records checksum-gated working files and expected outputs for two
 branches in an MRSA AK3 working dataset.
 
