@@ -9,6 +9,9 @@
 [![CI](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml/badge.svg)](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml/badge.svg)](https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21919038.svg)](https://doi.org/10.5281/zenodo.21919038)
+[![PyPI](https://img.shields.io/pypi/v/branchsnv.svg)](https://pypi.org/project/branchsnv/)
+[![Documentation Status](https://readthedocs.org/projects/branchsnv/badge/?version=latest)](https://branchsnv.readthedocs.io/en/latest/)
+[![bio.tools](https://img.shields.io/badge/bio.tools-branchsnv-005a9c.svg)](https://bio.tools/branchsnv)
 ![Python 3.10–3.14](https://img.shields.io/badge/Python-3.10%E2%80%933.14-3776AB?logo=python&logoColor=white)
 ![Runtime dependencies](https://img.shields.io/badge/runtime%20dependencies-0-2ea44f)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -53,7 +56,14 @@ can recur elsewhere and therefore not be clade-exclusive.
 
 BRANCHSNV requires Python 3.10 or later.
 
-Install the tagged release from the repository:
+Install the stable release from PyPI:
+
+```bash
+python -m pip install branchsnv==0.1.0
+branchsnv --version
+```
+
+Alternatively, install directly from the tagged source release:
 
 ```bash
 git clone https://github.com/RhysWhite/branchsnv.git
@@ -307,6 +317,14 @@ See [`VALIDATION_REPORT.md`](VALIDATION_REPORT.md) and
 [`docs/validation.md`](docs/validation.md) for details.
 
 ## Documentation
+
+Hosted documentation is available at
+[branchsnv.readthedocs.io](https://branchsnv.readthedocs.io/en/latest/).
+
+BRANCHSNV is indexed in the ELIXIR bio.tools registry as
+[`biotools:branchsnv`](https://bio.tools/branchsnv). The archived software
+release is available from [Zenodo](https://doi.org/10.5281/zenodo.21919038),
+and installable releases are available from [PyPI](https://pypi.org/project/branchsnv/).
 
 | Topic | Document |
 |---|---|
