@@ -6,16 +6,43 @@
   >
 </p>
 
-[![CI](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml/badge.svg)](https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml/badge.svg)](https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21919038.svg)](https://doi.org/10.5281/zenodo.21919038)
-[![PyPI](https://img.shields.io/pypi/v/branchsnv.svg)](https://pypi.org/project/branchsnv/)
-[![Documentation Status](https://readthedocs.org/projects/branchsnv/badge/?version=latest)](https://branchsnv.readthedocs.io/en/latest/)
-[![bio.tools](https://img.shields.io/badge/bio.tools-branchsnv-005a9c.svg)](https://bio.tools/branchsnv)
-![Python 3.10–3.14](https://img.shields.io/badge/Python-3.10%E2%80%933.14-3776AB?logo=python&logoColor=white)
-![Runtime dependencies](https://img.shields.io/badge/runtime%20dependencies-0-2ea44f)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![Status: beta](https://img.shields.io/badge/status-beta-blue)
+<p align="center">
+  <a href="https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml">
+    <img src="https://github.com/RhysWhite/branchsnv/actions/workflows/ci.yml/badge.svg" alt="CI">
+  </a>
+  <a href="https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml">
+    <img src="https://github.com/RhysWhite/branchsnv/actions/workflows/codeql.yml/badge.svg" alt="CodeQL">
+  </a>
+  <a href="https://www.python.org/downloads/">
+    <img src="https://img.shields.io/badge/Python-3.10%E2%80%933.14-3776AB?logo=python&logoColor=white" alt="Python 3.10–3.14">
+  </a>
+  <a href="https://github.com/RhysWhite/branchsnv/releases">
+    <img src="https://img.shields.io/github/v/release/RhysWhite/branchsnv?display_name=tag&sort=semver" alt="Latest release">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://pypi.org/project/branchsnv/">
+    <img src="https://img.shields.io/pypi/v/branchsnv.svg" alt="PyPI">
+  </a>
+  <a href="https://branchsnv.readthedocs.io/en/latest/">
+    <img src="https://readthedocs.org/projects/branchsnv/badge/?version=latest" alt="Documentation status">
+  </a>
+  <a href="https://bio.tools/branchsnv">
+    <img src="https://img.shields.io/badge/bio.tools-branchsnv-005a9c.svg" alt="bio.tools">
+  </a>
+  <a href="https://doi.org/10.5281/zenodo.21919038">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.21919038.svg" alt="DOI">
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/runtime%20dependencies-0-2ea44f" alt="Runtime dependencies: 0">
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT">
+  </a>
+  <img src="https://img.shields.io/badge/status-beta-blue" alt="Status: beta">
+</p>
 
 **Identify nucleotide states that distinguish a clade and substitutions that
 reconstruct to a selected phylogenetic branch — without conflating the two.**
