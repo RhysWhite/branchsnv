@@ -25,6 +25,12 @@
   <a href="https://pypi.org/project/branchsnv/">
     <img src="https://img.shields.io/pypi/v/branchsnv.svg" alt="PyPI">
   </a>
+  <a href="https://anaconda.org/bioconda/branchsnv">
+    <img src="https://img.shields.io/conda/vn/bioconda/branchsnv.svg?label=Bioconda" alt="Bioconda">
+  </a>
+  <a href="https://anaconda.org/bioconda/branchsnv">
+    <img src="https://img.shields.io/conda/dn/bioconda/branchsnv.svg?label=Conda%20downloads" alt="Conda downloads">
+  </a>
   <a href="https://branchsnv.readthedocs.io/en/latest/">
     <img src="https://readthedocs.org/projects/branchsnv/badge/?version=latest" alt="Documentation status">
   </a>
@@ -83,14 +89,25 @@ can recur elsewhere and therefore not be clade-exclusive.
 
 BRANCHSNV requires Python 3.10 or later.
 
-Install the stable release from PyPI:
+Install the stable release from Bioconda:
+
+```bash
+conda create -n branchsnv branchsnv=0.1.0 \
+  --channel conda-forge \
+  --channel bioconda \
+  --strict-channel-priority
+conda activate branchsnv
+branchsnv --version
+```
+
+Alternatively, install from PyPI:
 
 ```bash
 python -m pip install branchsnv==0.1.0
 branchsnv --version
 ```
 
-Alternatively, install directly from the tagged source release:
+Or install directly from the tagged source release:
 
 ```bash
 git clone https://github.com/RhysWhite/branchsnv.git
@@ -351,7 +368,9 @@ Hosted documentation is available at
 BRANCHSNV is indexed in the ELIXIR bio.tools registry as
 [`biotools:branchsnv`](https://bio.tools/branchsnv). The archived software
 release is available from [Zenodo](https://doi.org/10.5281/zenodo.21919038),
-and installable releases are available from [PyPI](https://pypi.org/project/branchsnv/).
+and installable releases are available from
+[Bioconda](https://anaconda.org/bioconda/branchsnv) and
+[PyPI](https://pypi.org/project/branchsnv/).
 
 | Topic | Document |
 |---|---|

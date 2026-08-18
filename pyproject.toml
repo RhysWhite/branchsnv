@@ -43,6 +43,7 @@ Repository = "https://github.com/RhysWhite/branchsnv"
 Issues = "https://github.com/RhysWhite/branchsnv/issues"
 Validation = "https://github.com/RhysWhite/branchsnv-validation"
 Changelog = "https://github.com/RhysWhite/branchsnv/blob/main/CHANGELOG.md"
+Bioconda = "https://anaconda.org/bioconda/branchsnv"
 
 [project.scripts]
 branchsnv = "branchsnv.cli:main"
