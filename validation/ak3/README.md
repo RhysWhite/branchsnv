@@ -41,6 +41,12 @@ nucleotide directions in the working matrix differ from the corresponding
 published table entries. These observations are preserved as a documented
 working-input/publication difference rather than altered to force agreement.
 
+The retained artefacts do not establish which historical upstream difference
+produced this discrepancy. In particular, the publication-stage provenance
+needed to distinguish between an alignment version, tree version, branch
+membership, filtering stage, or reference-state convention difference is not
+available.
+
 ## Run the regression check
 
 ```bash
