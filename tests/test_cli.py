@@ -161,6 +161,79 @@ class CliTests(unittest.TestCase):
                 )
             self.assertEqual(outputs[0], outputs[1])
 
+    def test_conventional_and_transposed_inputs_are_cli_equivalent(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            outputs = {}
+
+            for label, alignment in (
+                ("transposed", FIXTURES / "simple.nex"),
+                ("conventional", FIXTURES / "simple_conventional.nex"),
+            ):
+                run_root = root / label
+                run_root.mkdir()
+
+                results = run_root / "results.tsv"
+                members = run_root / "members.txt"
+                report = run_root / "report.json"
+
+                code = main(
+                    [
+                        "find",
+                        "--alignment",
+                        str(alignment),
+                        "--tree",
+                        str(FIXTURES / "simple.nwk"),
+                        "--outgroup",
+                        "Outgroup",
+                        "--clade-tips",
+                        str(FIXTURES / "ab_tips.txt"),
+                        "--mode",
+                        "both",
+                        "--output",
+                        str(results),
+                        "--members-output",
+                        str(members),
+                        "--report",
+                        str(report),
+                    ]
+                )
+
+                self.assertEqual(code, 0)
+
+                outputs[label] = {
+                    "results": results.read_bytes(),
+                    "members": members.read_bytes(),
+                    "report": json.loads(report.read_text(encoding="utf-8")),
+                }
+
+            self.assertEqual(
+                outputs["transposed"]["results"],
+                outputs["conventional"]["results"],
+            )
+            self.assertEqual(
+                outputs["transposed"]["members"],
+                outputs["conventional"]["members"],
+            )
+
+            transposed_alignment = outputs["transposed"]["report"]["inputs"]["alignment"]
+            conventional_alignment = outputs["conventional"]["report"]["inputs"]["alignment"]
+
+            self.assertEqual(
+                transposed_alignment["format"],
+                "transposed_nexus",
+            )
+            self.assertEqual(
+                conventional_alignment["format"],
+                "conventional_nexus",
+            )
+
+            for key in ("ntax", "nchar", "gap_symbol", "missing_symbol"):
+                self.assertEqual(
+                    transposed_alignment[key],
+                    conventional_alignment[key],
+                )
+
     def test_text_outputs_use_lf_line_endings(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

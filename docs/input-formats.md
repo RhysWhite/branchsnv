@@ -1,8 +1,11 @@
 # Input formats
 
-## Transposed NEXUS matrix
+## NEXUS matrix
 
-BRANCHSNV expects sites as rows and taxa as columns:
+BRANCHSNV accepts nucleotide NEXUS matrices in conventional
+taxon-by-character or transposed character-by-taxon orientation:
+
+### Transposed orientation
 
 ```nexus
 #NEXUS
@@ -17,11 +20,41 @@ BEGIN DATA;
 END;
 ```
 
+`TRANSPOSE`, `TRANSPOSE=YES`, or `TRANSPOSE=TRUE` identifies this orientation.
+`TAXLABELS` is required because taxa are represented as matrix columns.
+
 The first token on each matrix row is the site identifier. It is followed by
 either:
 
 - exactly `NTAX` single-character state tokens; or
 - one compact string of length `NTAX`.
+
+### Conventional orientation
+
+Without `TRANSPOSE`, or with `TRANSPOSE=NO` or `TRANSPOSE=FALSE`, taxa are rows and characters are columns:
+
+```nexus
+#NEXUS
+BEGIN DATA;
+    DIMENSIONS NTAX=5 NCHAR=2;
+    FORMAT SYMBOLS="ACGT" MISSING=? GAP=-;
+    TAXLABELS Outgroup A B C D;
+    CHARLABELS reference_100 reference_200;
+    MATRIX
+        Outgroup GC
+        A        AC
+        B        AC
+        C        GC
+        D        GC
+    ;
+END;
+```
+
+Each matrix row begins with a taxon label followed by either one compact sequence of length `NCHAR` or exactly `NCHAR` single-character state tokens.
+
+`TAXLABELS` is optional for conventional matrices. When present, it must contain exactly the same taxon set as the matrix and defines the normalized taxon order. When absent, matrix-row order is used.
+
+`CHARLABELS` is optional for conventional matrices. When present, it supplies site identifiers in character order. When absent, BRANCHSNV assigns deterministic one-based identifiers (`1`, `2`, ..., `NCHAR`). These are alignment character numbers only and are not interpreted as genomic coordinates.
 
 Quoted taxon and site labels are supported. Empty labels are rejected. If the
 `FORMAT` command declares `DATATYPE`, it must be `DNA` or `NUCLEOTIDE`; omitting
@@ -46,12 +79,12 @@ A/C/G/T are callable.
 
 ### Deliberately unsupported NEXUS features
 
-BRANCHSNV 0.1.0 rejects or does not implement:
+BRANCHSNV currently rejects or does not implement:
 
-- non-transposed matrices;
 - interleaved matrices;
 - multiple data or matrix blocks;
 - matrix rows continued over multiple physical lines;
+- `CHARSTATELABELS`;
 - polymorphism syntax such as `{AG}` or `(AG)`;
 - equate directives;
 - match-character expansion; and

@@ -379,7 +379,7 @@
           "minimum": 1
         },
         "format": {
-          "const": "transposed_nexus"
+          "enum": ["transposed_nexus", "conventional_nexus"]
         },
         "gap_symbol": {
           "type": "string",

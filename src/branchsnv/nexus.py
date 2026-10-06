@@ -1,4 +1,4 @@
-"""Strict parser for the transposed nucleotide NEXUS subset used by BRANCHSNV."""
+"""Strict parser for the nucleotide NEXUS subset used by BRANCHSNV."""
 
 from __future__ import annotations
 
@@ -187,33 +187,48 @@ def _parse_dimensions(command: str) -> tuple[int, int]:
     return ntax, nchar
 
 
-def _parse_format(command: str) -> tuple[str, str, str]:
+def _parse_format(command: str) -> tuple[str, str, str, bool]:
     datatype_match = re.search(r"\bdatatype\s*=\s*([^\s]+)", command, re.IGNORECASE)
     if datatype_match is not None:
         datatype = _unquote(datatype_match.group(1)).upper()
         if datatype not in {"DNA", "NUCLEOTIDE"}:
             raise NexusFormatError(
-                f"Unsupported FORMAT DATATYPE {datatype!r}; BRANCHSNV requires nucleotide data."
+                f"Unsupported FORMAT DATATYPE {datatype!r}; "
+                "BRANCHSNV requires nucleotide data."
             )
 
     transpose_match = re.search(
-        r"\btranspose\b(?:\s*=\s*([^\s]+))?", command, re.IGNORECASE
+        r"\btranspose\b(?:\s*=\s*([^\s]+))?",
+        command,
+        re.IGNORECASE,
     )
-    if not transpose_match:
-        raise NexusFormatError("BRANCHSNV requires FORMAT TRANSPOSE.")
-    transpose_value = transpose_match.group(1)
-    if transpose_value is not None and _unquote(transpose_value).lower() not in {
-        "yes",
-        "true",
-    }:
-        raise NexusFormatError("BRANCHSNV requires FORMAT TRANSPOSE or TRANSPOSE=YES.")
+    transposed = False
+    if transpose_match:
+        transpose_value = transpose_match.group(1)
+        if transpose_value is None:
+            transposed = True
+        else:
+            value = _unquote(transpose_value).lower()
+            if value in {"yes", "true"}:
+                transposed = True
+            elif value in {"no", "false"}:
+                transposed = False
+            else:
+                raise NexusFormatError(
+                    "FORMAT TRANSPOSE must be YES/TRUE, NO/FALSE, "
+                    "or specified without a value."
+                )
+
     interleave_match = re.search(
-        r"\binterleave\b(?:\s*=\s*([^\s]+))?", command, re.IGNORECASE
+        r"\binterleave\b(?:\s*=\s*([^\s]+))?",
+        command,
+        re.IGNORECASE,
     )
     if interleave_match:
         value = interleave_match.group(1)
         if value is None or _unquote(value).lower() not in {"no", "false"}:
             raise NexusFormatError("Interleaved matrices are not supported.")
+
     if re.search(r"\bmatchchar\s*=", command, re.IGNORECASE):
         raise NexusFormatError("FORMAT MATCHCHAR is not supported.")
     if re.search(r"\bequate\s*=", command, re.IGNORECASE):
@@ -226,45 +241,91 @@ def _parse_format(command: str) -> tuple[str, str, str]:
         command,
         re.IGNORECASE,
     )
+
     gap = _unquote(gap_match.group(1)) if gap_match else "-"
     missing = _unquote(missing_match.group(1)) if missing_match else "?"
+
     if symbols_match:
-        symbols = next(group for group in symbols_match.groups() if group is not None)
+        symbols = next(
+            group for group in symbols_match.groups() if group is not None
+        )
     else:
         symbols = "ACGT"
+
     symbols = "".join(dict.fromkeys(symbols.upper()))
+
     if not set("ACGT").issubset(set(symbols)):
         raise NexusFormatError("FORMAT SYMBOLS must include A, C, G, and T.")
     if len(gap) != 1 or len(missing) != 1:
         raise NexusFormatError("GAP and MISSING symbols must each be one character.")
+
     gap_upper = gap.upper()
     missing_upper = missing.upper()
+
     if gap_upper == missing_upper:
         raise NexusFormatError("GAP and MISSING symbols must differ.")
     if gap_upper in _IUPAC or missing_upper in _IUPAC:
         raise NexusFormatError(
-            "GAP and MISSING symbols must not overlap supported nucleotide/IUPAC symbols."
+            "GAP and MISSING symbols must not overlap supported "
+            "nucleotide/IUPAC symbols."
         )
-    return gap, missing, symbols
 
+    return gap, missing, symbols, transposed
 
-def _normalise_states(tokens: list[str], ntax: int, row_number: int) -> str:
-    if len(tokens) == 1 and len(tokens[0]) == ntax:
+def _normalise_states(tokens: list[str], count: int, row_number: int) -> str:
+    if len(tokens) == 1 and len(tokens[0]) == count:
         states = tokens[0]
-    elif len(tokens) == ntax and all(len(token) == 1 for token in tokens):
+    elif len(tokens) == count and all(len(token) == 1 for token in tokens):
         states = "".join(tokens)
     else:
         raise NexusFormatError(
             f"Matrix row {row_number} has {len(tokens)} state token(s); expected "
-            f"{ntax} single-character states or one compact string of length {ntax}."
+            f"{count} single-character states or one compact string of length {count}."
         )
     return states.upper()
 
 
-def read_transposed_nexus(path: str | Path) -> Alignment:
-    """Read and validate a transposed nucleotide NEXUS matrix."""
+def _validate_taxa(taxa: list[str], ntax: int, source: str) -> None:
+    if len(taxa) != ntax:
+        raise NexusFormatError(
+            f"{source} contains {len(taxa)} names, but NTAX declares {ntax}."
+        )
+    if any(name == "" for name in taxa):
+        raise NexusFormatError("Taxon labels must not be empty.")
+    if any("\n" in name or "\r" in name for name in taxa):
+        raise NexusFormatError("Taxon labels must not contain line breaks.")
+
+    duplicates = sorted(
+        name for name, count in Counter(taxa).items() if count > 1
+    )
+    if duplicates:
+        preview = ", ".join(duplicates[:5])
+        raise NexusFormatError(f"Duplicate taxon label(s): {preview}.")
+
+
+def _validate_charlabels(labels: list[str], nchar: int) -> None:
+    if len(labels) != nchar:
+        raise NexusFormatError(
+            f"CHARLABELS contains {len(labels)} labels, but NCHAR declares {nchar}."
+        )
+    if any(label == "" for label in labels):
+        raise NexusFormatError("Character labels must not be empty.")
+    if any("\n" in label or "\r" in label for label in labels):
+        raise NexusFormatError("Character labels must not contain line breaks.")
+
+    duplicates = sorted(
+        label for label, count in Counter(labels).items() if count > 1
+    )
+    if duplicates:
+        preview = ", ".join(duplicates[:5])
+        raise NexusFormatError(f"Duplicate character label(s): {preview}.")
+
+
+def _read_nexus(path: str | Path, *, require_transposed: bool) -> Alignment:
+    """Read and validate a supported nucleotide NEXUS matrix."""
 
     source = Path(path)
+
     try:
         raw = source.read_text(encoding="utf-8-sig")
     except UnicodeError as exc:
@@ -272,42 +333,75 @@ def read_transposed_nexus(path: str | Path) -> Alignment:
             f"Could not decode NEXUS file {source} as UTF-8: {exc}"
         ) from exc
     except OSError as exc:
-        raise NexusFormatError(f"Could not read NEXUS file {source}: {exc}") from exc
+        raise NexusFormatError(
+            f"Could not read NEXUS file {source}: {exc}"
+        ) from exc
 
     text = _strip_comments(raw)
+
     if not re.search(r"^\s*#nexus\b", text, re.IGNORECASE):
         raise NexusFormatError("File does not begin with #NEXUS.")
+
     block, block_start_line = _find_data_block(text)
     commands = _split_commands(block)
 
     dimensions: tuple[int, int] | None = None
-    format_values: tuple[str, str, str] | None = None
+    format_values: tuple[str, str, str, bool] | None = None
     taxa: list[str] | None = None
+    charlabels: list[str] | None = None
     matrix_command: tuple[str, int] | None = None
 
     for command, relative_line_number in commands:
         line_number = block_start_line + relative_line_number - 1
+
         keyword_match = re.match(r"\s*([A-Za-z]+)", command)
         if not keyword_match:
             continue
+
         keyword = keyword_match.group(1).lower()
-        raw_body = command[keyword_match.end() :]
+        raw_body = command[keyword_match.end():]
         body = raw_body.strip()
+
         if keyword == "dimensions":
             if dimensions is not None:
-                raise NexusFormatError("Multiple DIMENSIONS commands are not supported.")
+                raise NexusFormatError(
+                    "Multiple DIMENSIONS commands are not supported."
+                )
             dimensions = _parse_dimensions(body)
+
         elif keyword == "format":
             if format_values is not None:
-                raise NexusFormatError("Multiple FORMAT commands are not supported.")
+                raise NexusFormatError(
+                    "Multiple FORMAT commands are not supported."
+                )
             format_values = _parse_format(body)
+
         elif keyword == "taxlabels":
             if taxa is not None:
-                raise NexusFormatError("Multiple TAXLABELS commands are not supported.")
+                raise NexusFormatError(
+                    "Multiple TAXLABELS commands are not supported."
+                )
             taxa = _tokenize(body)
+
+        elif keyword == "charlabels":
+            if charlabels is not None:
+                raise NexusFormatError(
+                    "Multiple CHARLABELS commands are not supported."
+                )
+            charlabels = _tokenize(body)
+
+        elif keyword == "charstatelabels":
+            raise NexusFormatError(
+                "CHARSTATELABELS is not currently supported; "
+                "use CHARLABELS for explicit site identifiers."
+            )
+
         elif keyword == "matrix":
             if matrix_command is not None:
-                raise NexusFormatError("Multiple MATRIX commands are not supported.")
+                raise NexusFormatError(
+                    "Multiple MATRIX commands are not supported."
+                )
+
             leading = len(raw_body) - len(raw_body.lstrip())
             body_start_line = line_number + raw_body[:leading].count("\n")
             matrix_command = (body, body_start_line)
@@ -316,66 +410,243 @@ def read_transposed_nexus(path: str | Path) -> Alignment:
         raise NexusFormatError("DATA block has no DIMENSIONS command.")
     if format_values is None:
         raise NexusFormatError("DATA block has no FORMAT command.")
-    if taxa is None:
-        raise NexusFormatError("DATA block has no TAXLABELS command.")
     if matrix_command is None:
         raise NexusFormatError("DATA block has no MATRIX command.")
 
     ntax, nchar = dimensions
-    gap, missing, symbols = format_values
-    if len(taxa) != ntax:
-        raise NexusFormatError(
-            f"TAXLABELS contains {len(taxa)} names, but NTAX declares {ntax}."
-        )
-    if any(name == "" for name in taxa):
-        raise NexusFormatError("Taxon labels must not be empty.")
-    if any("\n" in name or "\r" in name for name in taxa):
-        raise NexusFormatError("Taxon labels must not contain line breaks.")
-    duplicates = sorted(name for name, count in Counter(taxa).items() if count > 1)
-    if duplicates:
-        preview = ", ".join(duplicates[:5])
-        raise NexusFormatError(f"Duplicate taxon label(s): {preview}.")
+    gap, missing, symbols, transposed = format_values
 
-    matrix_body, matrix_line = matrix_command
-    sites: list[Site] = []
-    site_ids: set[str] = set()
+    if require_transposed and not transposed:
+        raise NexusFormatError(
+            "This compatibility reader requires FORMAT TRANSPOSE "
+            "or TRANSPOSE=YES."
+        )
+
     allowed = _IUPAC | {gap.upper(), missing.upper()}
-    for offset, raw_line in enumerate(matrix_body.splitlines()):
-        if not raw_line.strip():
-            continue
-        tokens = _tokenize(raw_line)
-        if len(tokens) < 2:
-            raise NexusFormatError(
-                f"Matrix row near line {matrix_line + offset} must contain a site label and states."
-            )
-        site_id = tokens[0]
-        if not site_id:
-            raise NexusFormatError(
-                f"Matrix row near line {matrix_line + offset} has an empty site identifier."
-            )
-        if site_id in site_ids:
-            raise NexusFormatError(f"Duplicate matrix site identifier: {site_id}.")
-        states = _normalise_states(tokens[1:], ntax, len(sites) + 1)
-        invalid = sorted(set(states) - allowed)
-        if invalid:
-            raise NexusFormatError(
-                f"Site {site_id} contains unsupported state symbol(s): {', '.join(invalid)}."
-            )
-        site_ids.add(site_id)
-        sites.append(Site(site_id=site_id, states=states, input_row=len(sites) + 1))
+    matrix_body, matrix_line = matrix_command
 
-    if len(sites) != nchar:
-        raise NexusFormatError(
-            f"MATRIX contains {len(sites)} rows, but NCHAR declares {nchar}."
-        )
+    # ------------------------------------------------------------
+    # Transposed matrix: sites are rows, taxa are columns.
+    # ------------------------------------------------------------
+    if transposed:
+        if taxa is None:
+            raise NexusFormatError(
+                "Transposed NEXUS matrices require a TAXLABELS command."
+            )
+
+        _validate_taxa(taxa, ntax, "TAXLABELS")
+
+        sites: list[Site] = []
+        site_ids: set[str] = set()
+
+        for offset, raw_line in enumerate(matrix_body.splitlines()):
+            if not raw_line.strip():
+                continue
+
+            tokens = _tokenize(raw_line)
+
+            if len(tokens) < 2:
+                raise NexusFormatError(
+                    f"Matrix row near line {matrix_line + offset} must contain "
+                    "a site label and states."
+                )
+
+            site_id = tokens[0]
+
+            if not site_id:
+                raise NexusFormatError(
+                    f"Matrix row near line {matrix_line + offset} "
+                    "has an empty site identifier."
+                )
+
+            if site_id in site_ids:
+                raise NexusFormatError(
+                    f"Duplicate matrix site identifier: {site_id}."
+                )
+
+            states = _normalise_states(
+                tokens[1:],
+                ntax,
+                len(sites) + 1,
+            )
+
+            invalid = sorted(set(states) - allowed)
+            if invalid:
+                raise NexusFormatError(
+                    f"Site {site_id} contains unsupported state symbol(s): "
+                    f"{', '.join(invalid)}."
+                )
+
+            site_ids.add(site_id)
+            sites.append(
+                Site(
+                    site_id=site_id,
+                    states=states,
+                    input_row=len(sites) + 1,
+                )
+            )
+
+        if len(sites) != nchar:
+            raise NexusFormatError(
+                f"MATRIX contains {len(sites)} rows, but NCHAR declares {nchar}."
+            )
+
+        if charlabels is not None:
+            _validate_charlabels(charlabels, nchar)
+            matrix_labels = [site.site_id for site in sites]
+            if charlabels != matrix_labels:
+                raise NexusFormatError(
+                    "CHARLABELS do not match the site labels "
+                    "in the transposed MATRIX."
+                )
+
+        final_taxa = taxa
+        orientation = "transposed"
+
+    # ------------------------------------------------------------
+    # Conventional matrix: taxa are rows, sites are columns.
+    # ------------------------------------------------------------
+    else:
+        matrix_taxa: list[str] = []
+        sequences: dict[str, str] = {}
+
+        for offset, raw_line in enumerate(matrix_body.splitlines()):
+            if not raw_line.strip():
+                continue
+
+            tokens = _tokenize(raw_line)
+
+            if len(tokens) < 2:
+                raise NexusFormatError(
+                    f"Matrix row near line {matrix_line + offset} must contain "
+                    "a taxon label and states."
+                )
+
+            taxon = tokens[0]
+
+            if not taxon:
+                raise NexusFormatError(
+                    f"Matrix row near line {matrix_line + offset} "
+                    "has an empty taxon label."
+                )
+
+            if taxon in sequences:
+                raise NexusFormatError(
+                    f"Duplicate matrix taxon label: {taxon}."
+                )
+
+            states = _normalise_states(
+                tokens[1:],
+                nchar,
+                len(matrix_taxa) + 1,
+            )
+
+            invalid = sorted(set(states) - allowed)
+            if invalid:
+                raise NexusFormatError(
+                    f"Taxon {taxon} contains unsupported state symbol(s): "
+                    f"{', '.join(invalid)}."
+                )
+
+            matrix_taxa.append(taxon)
+            sequences[taxon] = states
+
+        if len(matrix_taxa) != ntax:
+            raise NexusFormatError(
+                f"MATRIX contains {len(matrix_taxa)} taxon rows, "
+                f"but NTAX declares {ntax}."
+            )
+
+        _validate_taxa(matrix_taxa, ntax, "MATRIX")
+
+        if taxa is None:
+            final_taxa = matrix_taxa
+        else:
+            _validate_taxa(taxa, ntax, "TAXLABELS")
+
+            matrix_set = set(matrix_taxa)
+            taxlabels_set = set(taxa)
+
+            if matrix_set != taxlabels_set:
+                missing_from_matrix = sorted(taxlabels_set - matrix_set)
+                undeclared_in_matrix = sorted(matrix_set - taxlabels_set)
+
+                details: list[str] = []
+
+                if missing_from_matrix:
+                    details.append(
+                        "missing from MATRIX: "
+                        + ", ".join(missing_from_matrix[:5])
+                    )
+
+                if undeclared_in_matrix:
+                    details.append(
+                        "not present in TAXLABELS: "
+                        + ", ".join(undeclared_in_matrix[:5])
+                    )
+
+                suffix = f" ({'; '.join(details)})" if details else ""
+
+                raise NexusFormatError(
+                    "TAXLABELS and MATRIX taxon sets differ"
+                    + suffix
+                    + "."
+                )
+
+            # TAXLABELS defines the normalized taxon order.
+            final_taxa = taxa
+
+        if charlabels is None:
+            site_labels = [
+                str(index)
+                for index in range(1, nchar + 1)
+            ]
+        else:
+            _validate_charlabels(charlabels, nchar)
+            site_labels = charlabels
+
+        sites = []
+
+        for site_index, site_id in enumerate(site_labels):
+            states = "".join(
+                sequences[taxon][site_index]
+                for taxon in final_taxa
+            )
+
+            sites.append(
+                Site(
+                    site_id=site_id,
+                    states=states,
+                    input_row=site_index + 1,
+                )
+            )
+
+        orientation = "conventional"
 
     return Alignment(
         path=source,
-        taxa=tuple(taxa),
+        taxa=tuple(final_taxa),
         sites=tuple(sites),
         ntax=ntax,
         nchar=nchar,
         gap=gap.upper(),
         missing=missing.upper(),
         symbols=symbols,
+        nexus_orientation=orientation,
     )
+
+
+def read_nexus(path: str | Path) -> Alignment:
+    """Read a conventional or transposed nucleotide NEXUS matrix."""
+
+    return _read_nexus(path, require_transposed=False)
+
+
+def read_transposed_nexus(path: str | Path) -> Alignment:
+    """Read a transposed nucleotide NEXUS matrix.
+
+    Retained as a backwards-compatible strict reader for callers that
+    specifically require transposed input.
+    """
+
+    return _read_nexus(path, require_transposed=True)

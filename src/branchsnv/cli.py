@@ -19,7 +19,7 @@ from .newick import (
     select_exact_descendants,
     select_mrca_branch,
 )
-from .nexus import read_transposed_nexus
+from .nexus import read_nexus
 from .provenance import build_report
 from .validation import validate_compatibility
 from .util import sha256_file
@@ -142,7 +142,7 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     validate_parser = subparsers.add_parser(
-        "validate", help="Validate a transposed NEXUS alignment and rooted Newick tree."
+        "validate", help="Validate a nucleotide NEXUS alignment and rooted Newick tree."
     )
     validate_parser.add_argument("--alignment", required=True, type=Path)
     validate_parser.add_argument("--tree", required=True, type=Path)
@@ -198,7 +198,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _run_validate(args: argparse.Namespace) -> int:
-    alignment = read_transposed_nexus(args.alignment)
+    alignment = read_nexus(args.alignment)
     tree, rooting = _root_tree(read_newick(args.tree), args)
     compatibility = validate_compatibility(alignment, tree)
     print(
@@ -226,7 +226,7 @@ def _run_find(args: argparse.Namespace) -> int:
         [args.output, args.members_output, args.report],
         [args.alignment, args.tree, args.clade_tips, args.outgroup_file],
     )
-    alignment = read_transposed_nexus(args.alignment)
+    alignment = read_nexus(args.alignment)
     tree, rooting = _root_tree(read_newick(args.tree), args)
     validate_compatibility(alignment, tree)
     branch, selector = _select_branch(tree, args)

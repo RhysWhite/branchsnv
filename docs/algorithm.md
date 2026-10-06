@@ -2,17 +2,19 @@
 
 ## 1. Input validation
 
-BRANCHSNV parses one transposed nucleotide NEXUS matrix and one Newick tree.
-Before analysis it verifies that:
+BRANCHSNV parses one nucleotide NEXUS matrix in conventional
+taxon-by-character or transposed character-by-taxon orientation and one Newick
+tree. Both orientations are normalized to the same internal site-by-taxon
+representation before analysis. It verifies that:
 
-- `NTAX` equals the number of unique taxon labels;
-- `NCHAR` equals the number of unique matrix rows;
-- every matrix row contains exactly `NTAX` states;
+- `NTAX` and `NCHAR` agree with the parsed matrix dimensions;
+- taxon labels and site identifiers are unique;
+- every taxon contributes exactly `NCHAR` nucleotide states;
 - every tree tip name is unique;
 - the tree and alignment taxon sets are identical; and
 - the requested branch exists under the explicit root.
 
-Taxa are matched by exact string equality. Matrix column order and Newick tip
+Taxa are matched by exact string equality. Matrix taxon order and Newick tip
 order are irrelevant.
 
 ## 2. Rooting

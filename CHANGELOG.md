@@ -7,6 +7,19 @@ and release identifiers follow PEP 440 conventions.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-06
+
+### Added
+
+- Added support for conventional taxon-by-character nucleotide NEXUS matrices
+  alongside the existing transposed format. Both orientations are normalized
+  to the same internal alignment representation and produce identical
+  scientific outputs for equivalent inputs.
+- Added optional `CHARLABELS` support for conventional matrices, with
+  deterministic positional site identifiers when character labels are absent.
+- Added provenance reporting of the parsed NEXUS orientation and regression
+  tests for conventional/transposed equivalence.
+
 ## [0.1.0] - 2026-08-12
 
 ### Added

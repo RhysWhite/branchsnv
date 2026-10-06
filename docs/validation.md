@@ -13,13 +13,14 @@ separate stable v0.1.0 release-validation record.
 
 ## Production test suite
 
-The current production suite contains 72 standard-library tests. GitHub Actions
+The current production suite contains 80 standard-library tests. GitHub Actions
 runs the suite on Python 3.10, 3.11, 3.12, 3.13, and 3.14 on Linux, with
 additional Python 3.14 jobs on macOS and Windows.
 
 The production tests cover:
 
-- strict transposed NEXUS parsing and malformed-input rejection;
+- strict conventional and transposed NEXUS parsing, orientation-normalization
+  equivalence, and malformed-input rejection;
 - Newick parsing, explicit rerooting, multifurcations, and duplicate-tip
   rejection;
 - exact branch selection, MRCA selection, deterministic branch IDs, and
