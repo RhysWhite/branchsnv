@@ -54,14 +54,14 @@
 reconstruct to a selected phylogenetic branch — without conflating the two.**
 
 BRANCHSNV is a dependency-free Python command-line tool for interrogating one
-selected branch of a rooted bacterial phylogeny using a transposed NEXUS SNV
+selected branch of a rooted bacterial phylogeny using a nucleotide NEXUS SNV
 matrix. It reports strict clade-exclusive nucleotide markers separately from
 substitutions reconstructed on the focal edge, retains uncertainty across
 all globally optimal equal-cost parsimony solutions, validates exact taxon and
 branch membership, and records deterministic SHA-256 provenance.
 
 ```text
-transposed NEXUS alignment  ─┐
+NEXUS alignment             ─┐
 Newick tree + rooting choice ├──> BRANCHSNV ───> results.tsv
 exact focal-clade tip list ──┘                  members.txt
                                                 report.json
@@ -161,7 +161,8 @@ Committed expected outputs are available in
 
 You need:
 
-1. a transposed nucleotide NEXUS matrix, with sites as rows and taxa as columns;
+1. a nucleotide NEXUS matrix in conventional taxon-by-character or transposed
+   character-by-taxon orientation;
 2. a Newick tree containing exactly the same taxon names; and
 3. the exact tip names descending from the branch of interest.
 
@@ -285,12 +286,13 @@ By default, parsimony mode reports only `unambiguous_change`. Add
 
 ## Input scope
 
-BRANCHSNV 0.1.0 supports one transposed nucleotide `DATA` or `CHARACTERS`
-NEXUS block and one Newick tree with unique exact tip names. It supports quoted
+BRANCHSNV accepts one nucleotide `DATA` or `CHARACTERS` NEXUS block in
+conventional taxon-by-character or transposed character-by-taxon orientation,
+together with one Newick tree with unique exact tip names. It supports quoted
 labels, comments, branch lengths, multifurcations, standard IUPAC ambiguity
 codes, and declared missing and gap symbols.
 
-It deliberately does not support non-transposed or interleaved matrices,
+It deliberately does not support interleaved matrices,
 multiple data blocks, indel reconstruction, structural variants, fuzzy taxon
 matching, or general-purpose NEXUS dialects. Unsupported content is rejected
 rather than guessed.
@@ -317,7 +319,7 @@ Production tests and publication validation are deliberately separated.
 
 The **production repository** contains the unit, regression, determinism,
 packaging, and bundled-example checks used during development. The current test
-suite contains **73 tests** and is run across Python 3.10–3.14, with additional
+suite contains **80 tests** and is run across Python 3.10–3.14, with additional
 macOS and Windows jobs in GitHub Actions.
 
 The independent **publication-validation repository** is maintained separately

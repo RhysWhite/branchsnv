@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from branchsnv.errors import NexusFormatError
-from branchsnv.nexus import read_transposed_nexus
+from branchsnv.nexus import read_nexus, read_transposed_nexus
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -78,7 +78,7 @@ class NexusTests(unittest.TestCase):
         self.assertEqual(alignment.taxa, ("A", "B"))
         self.assertEqual(alignment.sites[0].states, "AC")
 
-    def test_rejects_non_transposed_matrix(self) -> None:
+    def test_legacy_transposed_reader_rejects_non_transposed_matrix(self) -> None:
         text = """#NEXUS
         BEGIN DATA;
         DIMENSIONS NTAX=2 NCHAR=1;
@@ -94,7 +94,7 @@ class NexusTests(unittest.TestCase):
                 read_transposed_nexus(path)
 
 
-    def test_rejects_explicit_transpose_no(self) -> None:
+    def test_legacy_transposed_reader_rejects_explicit_transpose_no(self) -> None:
         text = """#NEXUS
         BEGIN DATA;
         DIMENSIONS NTAX=2 NCHAR=1;
@@ -351,6 +351,180 @@ B' C;
             path.write_text(text, encoding="utf-8")
             with self.assertRaisesRegex(NexusFormatError, "line breaks"):
                 read_transposed_nexus(path)
+
+
+    def test_reads_conventional_matrix(self) -> None:
+        alignment = read_nexus(FIXTURES / "simple_conventional.nex")
+
+        self.assertEqual(alignment.ntax, 5)
+        self.assertEqual(alignment.nchar, 6)
+        self.assertEqual(
+            alignment.taxa,
+            ("Outgroup", "A", "B", "C", "D"),
+        )
+        self.assertEqual(
+            alignment.nexus_orientation,
+            "conventional",
+        )
+        self.assertEqual(
+            alignment.sites[0].site_id,
+            "ref_1",
+        )
+        self.assertEqual(
+            alignment.sites[0].states,
+            "GAAGG",
+        )
+        self.assertEqual(
+            alignment.sites[4].states,
+            "G?AGG",
+        )
+
+    def test_conventional_and_transposed_normalise_identically(self) -> None:
+        conventional = read_nexus(
+            FIXTURES / "simple_conventional.nex"
+        )
+        transposed = read_nexus(
+            FIXTURES / "simple.nex"
+        )
+
+        self.assertEqual(
+            conventional.taxa,
+            transposed.taxa,
+        )
+        self.assertEqual(
+            conventional.ntax,
+            transposed.ntax,
+        )
+        self.assertEqual(
+            conventional.nchar,
+            transposed.nchar,
+        )
+        self.assertEqual(
+            conventional.gap,
+            transposed.gap,
+        )
+        self.assertEqual(
+            conventional.missing,
+            transposed.missing,
+        )
+        self.assertEqual(
+            conventional.symbols,
+            transposed.symbols,
+        )
+
+        self.assertEqual(
+            [
+                (site.site_id, site.states)
+                for site in conventional.sites
+            ],
+            [
+                (site.site_id, site.states)
+                for site in transposed.sites
+            ],
+        )
+
+    def test_conventional_without_taxlabels_uses_matrix_order(self) -> None:
+        text = """#NEXUS
+        BEGIN DATA;
+        DIMENSIONS NTAX=3 NCHAR=2;
+        FORMAT DATATYPE=DNA GAP=- MISSING=?;
+        CHARLABELS ref_10 ref_20;
+        MATRIX
+            C GT
+            A AC
+            B TT
+        ;
+        END;
+        """
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "input.nex"
+            path.write_text(text, encoding="utf-8")
+            alignment = read_nexus(path)
+
+        self.assertEqual(
+            alignment.taxa,
+            ("C", "A", "B"),
+        )
+        self.assertEqual(
+            [
+                (site.site_id, site.states)
+                for site in alignment.sites
+            ],
+            [
+                ("ref_10", "GAT"),
+                ("ref_20", "TCT"),
+            ],
+        )
+
+    def test_conventional_taxlabels_define_normalized_order(self) -> None:
+        text = """#NEXUS
+        BEGIN DATA;
+        DIMENSIONS NTAX=3 NCHAR=2;
+        FORMAT DATATYPE=DNA GAP=- MISSING=? TRANSPOSE=NO;
+        TAXLABELS A B C;
+        CHARLABELS ref_10 ref_20;
+        MATRIX
+            C GT
+            A AC
+            B TT
+        ;
+        END;
+        """
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "input.nex"
+            path.write_text(text, encoding="utf-8")
+            alignment = read_nexus(path)
+
+        self.assertEqual(
+            alignment.taxa,
+            ("A", "B", "C"),
+        )
+        self.assertEqual(
+            alignment.sites[0].states,
+            "ATG",
+        )
+        self.assertEqual(
+            alignment.sites[1].states,
+            "CTT",
+        )
+
+    def test_conventional_without_charlabels_gets_positional_ids(self) -> None:
+        text = """#NEXUS
+        BEGIN DATA;
+        DIMENSIONS NTAX=2 NCHAR=3;
+        FORMAT DATATYPE=DNA;
+        MATRIX
+            A ACG
+            B ATG
+        ;
+        END;
+        """
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "input.nex"
+            path.write_text(text, encoding="utf-8")
+            alignment = read_nexus(path)
+
+        self.assertEqual(
+            [site.site_id for site in alignment.sites],
+            ["1", "2", "3"],
+        )
+        self.assertEqual(
+            [site.states for site in alignment.sites],
+            ["AA", "CT", "GG"],
+        )
+
+    def test_legacy_transposed_reader_remains_strict(self) -> None:
+        with self.assertRaisesRegex(
+            NexusFormatError,
+            "requires FORMAT TRANSPOSE",
+        ):
+            read_transposed_nexus(
+                FIXTURES / "simple_conventional.nex"
+            )
+
 
 
 if __name__ == "__main__":

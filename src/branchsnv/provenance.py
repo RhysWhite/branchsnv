@@ -37,7 +37,7 @@ def build_report(
                 "sha256": sha256_file(alignment_path),
                 "ntax": alignment.ntax,
                 "nchar": alignment.nchar,
-                "format": "transposed_nexus",
+                "format": f"{alignment.nexus_orientation}_nexus",
                 "gap_symbol": alignment.gap,
                 "missing_symbol": alignment.missing,
             },

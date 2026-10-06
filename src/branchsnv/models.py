@@ -69,6 +69,7 @@ class Alignment:
     gap: str
     missing: str
     symbols: str
+    nexus_orientation: str = "transposed"
 
     @property
     def taxon_index(self) -> dict[str, int]:
