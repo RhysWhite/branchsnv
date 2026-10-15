@@ -11,35 +11,10 @@ This separation prevents clade exclusivity from being treated as equivalent to s
 
 ## Installation
 
-BRANCHSNV requires Python 3.10 or later.
-
-Install the stable v0.1.0 release from Bioconda:
-
-```bash
-conda create -n branchsnv branchsnv=0.1.0 \
-  --channel conda-forge \
-  --channel bioconda \
-  --strict-channel-priority
-conda activate branchsnv
-branchsnv --version
-```
-
-Alternatively, install from PyPI:
-
-```bash
-python -m pip install branchsnv==0.1.0
-branchsnv --version
-```
-
-The immutable tagged source release can also be installed directly:
-
-```bash
-git clone https://github.com/RhysWhite/branchsnv.git
-cd branchsnv
-git checkout v0.1.0
-python -m pip install .
-branchsnv --version
-```
+See the [version-pinned installation instructions](../README.md#installation).
+They distinguish the independently validated v0.1.0 release from this
+v0.2.0 source checkout, which adds conventional NEXUS support. See the
+[validation record](validation.md) for the scope of independent testing.
 
 ## Start here
 

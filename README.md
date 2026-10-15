@@ -89,7 +89,14 @@ can recur elsewhere and therefore not be clade-exclusive.
 
 BRANCHSNV requires Python 3.10 or later.
 
-Install the stable release from Bioconda:
+The installation commands below intentionally pin **v0.1.0**, the version
+covered by independent publication validation. This source checkout is
+**v0.2.0** (see [`CHANGELOG.md`](CHANGELOG.md)); conventional NEXUS input
+was added in v0.2.0. Use the pinned source installation below when that
+feature is required. Production regression tests for v0.2.0 do not by
+themselves establish independent publication validation of v0.2.0.
+
+Install the independently validated v0.1.0 release from Bioconda:
 
 ```bash
 conda create -n branchsnv branchsnv=0.1.0 \
@@ -113,6 +120,16 @@ Or install directly from the tagged source release:
 git clone https://github.com/RhysWhite/branchsnv.git
 cd branchsnv
 git checkout v0.1.0
+python -m pip install .
+branchsnv --version
+```
+
+To install **v0.2.0** from the precise source commit reviewed here:
+
+```bash
+git clone https://github.com/RhysWhite/branchsnv.git
+cd branchsnv
+git checkout b63b6dbdde46162570dd0d17902e619467771624
 python -m pip install .
 branchsnv --version
 ```

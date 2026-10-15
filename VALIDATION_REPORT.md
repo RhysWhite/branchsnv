@@ -1,6 +1,10 @@
 # BRANCHSNV validation overview
 
-**Production software version:** 0.1.0
+**Independently validated stable software release:** 0.1.0
+
+**Source-tree version at this commit:** 0.2.0. Conventional NEXUS support
+was added in v0.2.0; independent publication validation of that version
+is not established by this report.
 
 **Historical publication-validation snapshot:** 0.1.0a1
 
@@ -17,7 +21,9 @@ implementations from sharing or modifying the production reconstruction logic.
 
 ## Production test suite
 
-The current production suite passes **72/72 tests**.
+The v0.1.0 production suite passed **72/72 tests**. The v0.2.0
+source-tree regression suite is reported separately in the repository README
+and [`docs/validation.md`](docs/validation.md).
 
 It covers:
 
