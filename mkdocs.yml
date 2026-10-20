@@ -1,5 +1,5 @@
 site_name: BRANCHSNV
-site_description: Exact branch-level SNV interrogation from rooted phylogenies and transposed NEXUS matrices
+site_description: Exact branch-level SNV interrogation from rooted phylogenies and nucleotide NEXUS matrices
 site_url: https://branchsnv.readthedocs.io/
 repo_url: https://github.com/RhysWhite/branchsnv
 repo_name: RhysWhite/branchsnv
@@ -13,6 +13,7 @@ nav:
   - Input formats: input-formats.md
   - Branch selection: branch-selection.md
   - Algorithm: algorithm.md
+  - Implementation map (v0.2.0): implementation-map.md
   - Interpretation: interpretation.md
   - Workflow integration: workflow-integration.md
   - Validation: validation.md

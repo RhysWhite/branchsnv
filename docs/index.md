@@ -24,7 +24,8 @@ v0.2.0 source checkout, which adds conventional NEXUS support. See the
 - [Interpretation](interpretation.md): what BRANCHSNV results do and do not imply.
 - [Workflow integration](workflow-integration.md): use in reproducible pipelines.
 - [Validation](validation.md): production testing and independent publication validation.
-- [Code walkthrough](code-walkthrough/README.md): line-by-line implementation documentation.
+- [Current implementation map](implementation-map.md): concise source-to-algorithm navigation for v0.2.0.
+- [Historical code walkthrough](code-walkthrough/README.md): source-specific documentation for v0.1.0a1 only.
 
 ## Citation and archival record
 

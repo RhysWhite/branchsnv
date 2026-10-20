@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "branchsnv"
 version = "0.2.0"
-description = "Dependency-free identification of branch-associated SNVs from rooted phylogenies and transposed NEXUS matrices"
+description = "Dependency-free identification of branch-associated SNVs from rooted phylogenies and nucleotide NEXUS matrices"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"

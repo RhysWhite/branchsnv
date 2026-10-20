@@ -124,18 +124,25 @@ python -m pip install .
 branchsnv --version
 ```
 
-To install **v0.2.0** from the precise source commit reviewed here:
+To install **v0.2.0** from the audited source snapshot (the full commit below
+identifies the source used in the 20 October 2026 independent partial checks;
+it is **not** a substitute for a tagged, fully validated release):
 
 ```bash
 git clone https://github.com/RhysWhite/branchsnv.git
 cd branchsnv
-git checkout b63b6dbdde46162570dd0d17902e619467771624
+git checkout f09b25148c901d2119a6c8b61edbb7da0a561e04
 python -m pip install .
 branchsnv --version
 ```
 
 For development installation and contribution guidance, see
 [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+For current source-to-algorithm navigation, see the
+[v0.2.0 implementation map](docs/implementation-map.md). For immutable
+evidence paths and version-scoped claims, use the
+[validation repository evidence index](https://github.com/RhysWhite/branchsnv-validation/blob/main/EVIDENCE_INDEX.md).
 
 ## Quick start
 

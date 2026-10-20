@@ -11,6 +11,10 @@ and records the analyses supporting the manuscript-level validation claims.
 It preserves the historical BRANCHSNV v0.1.0a1 publication snapshot and a
 separate stable v0.1.0 release-validation record.
 
+For exact frozen result paths, denominators and version boundaries, consult
+the [validation evidence index](https://github.com/RhysWhite/branchsnv-validation/blob/main/EVIDENCE_INDEX.md).
+The v0.2.0 parser extensions are not covered by the v0.1.0 stable archive.
+
 ## Production test suite
 
 The current production suite contains 80 standard-library tests. GitHub Actions
