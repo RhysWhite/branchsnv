@@ -46,11 +46,12 @@ strict fixed-exclusive marker          focal-edge change classification
 
 ## Version boundaries
 
-The implementation here describes **v0.2.0**. The committed independent six-
-experiment stable validation record tests **v0.1.0**, not v0.2.0. The additional
-conventional-NEXUS parser is regression-tested in production, but needs a
-version-specific independently reproduced release-validation record before
-v0.2.0 is claimed to have the same archival validation status.
+The implementation here describes **v0.2.0**. Separate independent records
+exist for [v0.1.0](https://github.com/RhysWhite/branchsnv-validation/tree/main/release_validation/v0.1.0)
+and [v0.2.0](https://github.com/RhysWhite/branchsnv-validation/tree/51471ce6220b329229971ae63e2d6ee3b03d9aca/release_validation/v0.2.0).
+The latter reproduces Experiments 01–06 and includes 540 conventional/transposed
+NEXUS-equivalence checks. Its results are verified; the v0.2.0 Zenodo deposit
+and scientific publication approval are pending. Experiment 07 remains separate.
 
 The historical [v0.1.0a1 code walkthrough](code-walkthrough/README.md) is
 preserved for reproducibility. Do not treat its individual source-line mapping
