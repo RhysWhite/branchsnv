@@ -1,6 +1,19 @@
 # BRANCHSNV validation overview
 
-**Production software version:** 0.1.0
+**Previously archived stable release:** 0.1.0.
+
+**Current source-tree version:** 0.2.0, including conventional NEXUS input.
+A fresh six-experiment reproduction and independent retained-output audit
+passed for source commit `65eb791d9f1a202c3ca8816332a58c036794bd1f`.
+The [v0.2.0 evidence](https://github.com/RhysWhite/branchsnv-validation/tree/51471ce6220b329229971ae63e2d6ee3b03d9aca/release_validation/v0.2.0)
+is frozen locally; its Zenodo archive and final publication approval are pending.
+
+The existing production `v0.2.0` tag resolves to `b63b6dbdde46162570dd0d17902e619467771624`,
+not the validated commit. The repository-level comparison reports no changes
+to `src/branchsnv/` or `tests/` between those commits; the archived
+validation nevertheless identifies its exact tested source commit rather than
+substituting the older tag. This source-equivalence statement is not a
+claim that the two complete repository archives are byte-identical.
 
 **Historical publication-validation snapshot:** 0.1.0a1
 
@@ -17,7 +30,9 @@ implementations from sharing or modifying the production reconstruction logic.
 
 ## Production test suite
 
-The current production suite passes **72/72 tests**.
+The v0.1.0 production suite passed **72/72 tests**. The v0.2.0
+source-tree regression suite is reported separately in the repository README
+and [`docs/validation.md`](docs/validation.md).
 
 It covers:
 
@@ -61,10 +76,13 @@ GitHub Actions compares the generated `results.tsv`, `members.txt`, and
 ## Independent validation records
 
 The separate publication-validation repository contains six experiment layers
-and preserves two version-pinned records. The historical publication snapshot
-evaluates BRANCHSNV v0.1.0a1. A separate stable v0.1.0 release-validation record
-archives a fresh run against production commit `71b055bdbd8e00ee63afda136b88892aee0062f8`
-using validation-framework commit `cfb07389191540ca57c9e822b254c279ab903f36`.
+and preserves the historical v0.1.0a1 snapshot, the stable v0.1.0 release record,
+and the freshly reproduced v0.2.0 record. The v0.1.0 release run used production
+commit `71b055bdbd8e00ee63afda136b88892aee0062f8` and validation framework
+`cfb07389191540ca57c9e822b254c279ab903f36`. The v0.2.0 run used production
+commit `65eb791d9f1a202c3ca8816332a58c036794bd1f` and validation framework
+`3c64a1d367253ddcaef06c2f07012f347606358e`. The v0.2.0 evidence is
+committed in validation repository `51471ce6220b329229971ae63e2d6ee3b03d9aca`.
 
 The stable run completed with `REPRODUCED RESULTS: PASS`: production source
 identity was verified for all 13 Python source files, validation-script identity
@@ -72,7 +90,8 @@ was verified, deterministic analytical outputs matched the canonical scientific
 snapshot exactly, Experiments 01–06 met their exact pass criteria, and the
 Experiment 04 protocol contained 3 repetitions and 39 measured runs.
 
-The two records support the following headline results:
+The v0.1.0a1 and v0.1.0 records support the following headline results;
+the v0.2.0 record reproduced the deterministic analytical counts:
 
 | Experiment | Result |
 |---|---|
@@ -125,6 +144,7 @@ checksum-gated working-data regression recipe. It is useful for guarding
 against changes in behaviour on those exact development inputs, but it is no
 longer the primary evidence supporting BRANCHSNV's scientific validation.
 
-The authoritative independent validation records are maintained in the separate
-`branchsnv-validation` repository: the historical publication snapshot and the
-version-pinned stable v0.1.0 release-validation record.
+The authoritative independent records are in `branchsnv-validation`, under
+the historical snapshot and versioned `release_validation/v0.1.0/` and
+`release_validation/v0.2.0/` directories. The v0.2.0 record also preserves
+540 NEXUS-representation equivalence analyses. Experiment 07 is excluded.

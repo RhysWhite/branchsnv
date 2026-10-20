@@ -38,7 +38,7 @@
     <img src="https://img.shields.io/badge/bio.tools-branchsnv-005a9c.svg" alt="bio.tools">
   </a>
   <a href="https://doi.org/10.5281/zenodo.21919038">
-    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.21919038.svg" alt="DOI">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.21919038.svg" alt="v0.1.0 software archive DOI">
   </a>
 </p>
 
@@ -89,7 +89,13 @@ can recur elsewhere and therefore not be clade-exclusive.
 
 BRANCHSNV requires Python 3.10 or later.
 
-Install the stable release from Bioconda:
+The package-installation examples below use **v0.1.0**. The current
+**v0.2.0** source adds conventional NEXUS input and has a separately
+reproduced [v0.2.0 validation record](https://github.com/RhysWhite/branchsnv-validation/tree/51471ce6220b329229971ae63e2d6ee3b03d9aca/release_validation/v0.2.0).
+That record is verified but not yet deposited in Zenodo. The v0.1.0
+software and validation DOIs below identify the earlier archived releases.
+
+Install the independently validated v0.1.0 release from Bioconda:
 
 ```bash
 conda create -n branchsnv branchsnv=0.1.0 \
@@ -117,8 +123,24 @@ python -m pip install .
 branchsnv --version
 ```
 
+To install the **v0.2.0 source used in the full independent reproduction**,
+check out the exact validated commit:
+
+```bash
+git clone https://github.com/RhysWhite/branchsnv.git
+cd branchsnv
+git checkout 65eb791d9f1a202c3ca8816332a58c036794bd1f
+python -m pip install .
+branchsnv --version
+```
+
 For development installation and contribution guidance, see
 [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+For current source-to-algorithm navigation, see the
+[v0.2.0 implementation map](docs/implementation-map.md). For immutable
+evidence paths and version-scoped claims, use the
+[validation repository evidence index](https://github.com/RhysWhite/branchsnv-validation/blob/main/EVIDENCE_INDEX.md).
 
 ## Quick start
 
@@ -352,8 +374,17 @@ analytical outputs in the canonical scientific snapshot. Experiment 04
 performance measurements are retained as environment-specific observations.
 
 At validation-repository commit `35a0794ddd9782355e1e06dd95bd10e1cde4c735`,
-the stable record is checksum-gated and checked in CI. The historical snapshot
+the v0.1.0 record is checksum-gated and checked in CI. The historical snapshot
 remains separately verifiable with `verify_publication_snapshot.py`.
+
+The **v0.2.0** reproduction passed the same six-experiment protocol against
+production commit `65eb791d9f1a202c3ca8816332a58c036794bd1f` using
+validation framework `3c64a1d367253ddcaef06c2f07012f347606358e`.
+The [frozen v0.2.0 record](https://github.com/RhysWhite/branchsnv-validation/tree/51471ce6220b329229971ae63e2d6ee3b03d9aca/release_validation/v0.2.0)
+retains 47 results, input and source checksums, the execution environment,
+and a 540-analysis conventional/transposed NEXUS equivalence audit.
+The results passed retained-data verification; Zenodo deposition and final
+publication approval remain pending. Experiment 07 is not part of this record.
 
 The older [`validation/ak3/`](validation/ak3/) directory in this repository is
 retained as a checksum-gated working-data regression recipe. It is **not** the

@@ -8,8 +8,16 @@ production repository contains development-facing tests and regression checks.
 The independent publication-validation framework is maintained at
 [RhysWhite/branchsnv-validation](https://github.com/RhysWhite/branchsnv-validation)
 and records the analyses supporting the manuscript-level validation claims.
-It preserves the historical BRANCHSNV v0.1.0a1 publication snapshot and a
-separate stable v0.1.0 release-validation record.
+It preserves the historical BRANCHSNV v0.1.0a1 snapshot, a stable v0.1.0
+release-validation record, and a newly reproduced
+[v0.2.0 record](https://github.com/RhysWhite/branchsnv-validation/tree/51471ce6220b329229971ae63e2d6ee3b03d9aca/release_validation/v0.2.0)
+with separate source identity and checksums.
+
+For exact frozen result paths, denominators and version boundaries, consult
+the [validation evidence index](https://github.com/RhysWhite/branchsnv-validation/blob/main/EVIDENCE_INDEX.md).
+The v0.2.0 parser extensions are not covered by the v0.1.0 archive;
+540 conventional/transposed NEXUS-equivalence analyses are instead retained in
+the new v0.2.0 record. Zenodo archival approval is pending.
 
 ## Production test suite
 
