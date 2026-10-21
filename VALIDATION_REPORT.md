@@ -1,5 +1,7 @@
 # BRANCHSNV validation overview
 
+**BRANCHSNV v0.2.0 archival records:** [software (10.5281/zenodo.23518619)](https://doi.org/10.5281/zenodo.23518619) · [independent validation and reproduction (10.5281/zenodo.23518684)](https://doi.org/10.5281/zenodo.23518684).
+
 **Previously archived stable release:** 0.1.0.
 
 **Current source-tree version:** 0.2.0, including conventional NEXUS input.

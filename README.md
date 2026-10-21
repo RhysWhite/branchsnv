@@ -37,8 +37,8 @@
   <a href="https://bio.tools/branchsnv">
     <img src="https://img.shields.io/badge/bio.tools-branchsnv-005a9c.svg" alt="bio.tools">
   </a>
-  <a href="https://doi.org/10.5281/zenodo.21919038">
-    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.21919038.svg" alt="v0.1.0 software archive DOI">
+  <a href="https://doi.org/10.5281/zenodo.23518619">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23518619.svg" alt="v0.1.0 software archive DOI">
   </a>
 </p>
 
@@ -72,6 +72,8 @@ exact focal-clade tip list ──┘                  members.txt
 > inference, recombination filtering, and other upstream processing. It does
 > not call variants, build a tree, detect recombination, annotate genes, infer
 > functional effects, or establish causation.
+
+**BRANCHSNV v0.2.0 archival records:** [software (10.5281/zenodo.23518619)](https://doi.org/10.5281/zenodo.23518619) · [independent validation and reproduction (10.5281/zenodo.23518684)](https://doi.org/10.5281/zenodo.23518684).
 
 ## What BRANCHSNV reports
 
