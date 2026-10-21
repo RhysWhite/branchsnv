@@ -1,5 +1,7 @@
 # BRANCHSNV
 
+**BRANCHSNV v0.2.0 archival records:** [software (10.5281/zenodo.23518619)](https://doi.org/10.5281/zenodo.23518619) · [independent validation and reproduction (10.5281/zenodo.23518684)](https://doi.org/10.5281/zenodo.23518684).
+
 BRANCHSNV is a dependency-free Python command-line tool for interrogating one selected branch of a rooted bacterial phylogeny using a nucleotide NEXUS SNV matrix in conventional or transposed orientation.
 
 It reports two properties separately:

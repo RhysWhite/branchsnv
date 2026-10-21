@@ -1,5 +1,7 @@
 # Validation strategy
 
+**BRANCHSNV v0.2.0 archival records:** [software (10.5281/zenodo.23518619)](https://doi.org/10.5281/zenodo.23518619) · [independent validation and reproduction (10.5281/zenodo.23518684)](https://doi.org/10.5281/zenodo.23518684).
+
 BRANCHSNV uses layered validation so that confidence in the software does not
 depend on one implementation, one dataset, or one successful example.
 

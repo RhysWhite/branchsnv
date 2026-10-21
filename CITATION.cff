@@ -6,8 +6,7 @@ authors:
   - family-names: "White"
     given-names: "Rhys T."
 version: 0.2.0
-# Version-specific v0.2.0 Zenodo DOI deliberately omitted pending
-# verification of deposited source identity and files.
+doi: "10.5281/zenodo.23518619"
 license: MIT
 repository-code: "https://github.com/RhysWhite/branchsnv"
 abstract: >-
