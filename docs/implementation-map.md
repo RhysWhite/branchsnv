@@ -23,12 +23,12 @@ strict fixed-exclusive marker          focal-edge change classification
 
 | Stage | Source | Scientific invariant | Independent evidence |
 |---|---|---|---|
-| Command and selection | [`cli.py`](../src/branchsnv/cli.py) | One selected edge; explicit rooting | [validation Experiments 01–02](https://github.com/RhysWhite/branchsnv-validation/tree/main/experiments) |
-| Nucleotide matrix | [`nexus.py`](../src/branchsnv/nexus.py) | Accept conventional and transposed NEXUS; normalize to one site model | Production NEXUS orientation tests; see `tests/` |
-| Phylogeny | [`newick.py`](../src/branchsnv/newick.py), [`models.py`](../src/branchsnv/models.py) | Exact taxa, root, descendants, deterministic IDs | Validation Experiment 02 |
-| Strict marker | [`analysis.py`](../src/branchsnv/analysis.py) | Every ingroup and outgroup observation must be callable for a marker | Validation Experiments 01–02 and 06 |
-| Edge substitutions | [`parsimony.py`](../src/branchsnv/parsimony.py) | Retain **all** globally optimal equal-cost Sankoff parent-child state pairs | Validation Experiment 01 oracle |
-| Output | [`writing.py`](../src/branchsnv/writing.py), [`provenance.py`](../src/branchsnv/provenance.py) | Deterministic files, no silent overwriting, source/input checksums | Production regression tests |
+| Command and selection | [`cli.py`](https://github.com/RhysWhite/branchsnv/blob/v0.2.0/src/branchsnv/cli.py) | One selected edge; explicit rooting | [validation Experiments 01–02](https://github.com/RhysWhite/branchsnv-validation/tree/main/experiments) |
+| Nucleotide matrix | [`nexus.py`](https://github.com/RhysWhite/branchsnv/blob/v0.2.0/src/branchsnv/nexus.py) | Accept conventional and transposed NEXUS; normalize to one site model | Production NEXUS orientation tests; see `tests/` |
+| Phylogeny | [`newick.py`](https://github.com/RhysWhite/branchsnv/blob/v0.2.0/src/branchsnv/newick.py), [`models.py`](https://github.com/RhysWhite/branchsnv/blob/v0.2.0/src/branchsnv/models.py) | Exact taxa, root, descendants, deterministic IDs | Validation Experiment 02 |
+| Strict marker | [`analysis.py`](https://github.com/RhysWhite/branchsnv/blob/v0.2.0/src/branchsnv/analysis.py) | Every ingroup and outgroup observation must be callable for a marker | Validation Experiments 01–02 and 06 |
+| Edge substitutions | [`parsimony.py`](https://github.com/RhysWhite/branchsnv/blob/v0.2.0/src/branchsnv/parsimony.py) | Retain **all** globally optimal equal-cost Sankoff parent-child state pairs | Validation Experiment 01 oracle |
+| Output | [`writing.py`](https://github.com/RhysWhite/branchsnv/blob/v0.2.0/src/branchsnv/writing.py), [`provenance.py`](https://github.com/RhysWhite/branchsnv/blob/v0.2.0/src/branchsnv/provenance.py) | Deterministic files, no silent overwriting, source/input checksums | Production regression tests |
 
 ## Interpretation boundaries
 

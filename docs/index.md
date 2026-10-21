@@ -13,7 +13,7 @@ This separation prevents clade exclusivity from being treated as equivalent to s
 
 ## Installation
 
-See the [version-pinned installation instructions](../README.md#installation).
+See the [version-pinned installation instructions](https://github.com/RhysWhite/branchsnv/blob/v0.2.0/README.md#installation).
 They distinguish the independently validated v0.1.0 release from this
 v0.2.0 source checkout, which adds conventional NEXUS support. See the
 [validation record](validation.md) for the scope of independent testing.
