@@ -14,11 +14,13 @@ nav:
   - Branch selection: branch-selection.md
   - Algorithm: algorithm.md
   - Implementation map (v0.2.0): implementation-map.md
+  - References and related tools: references.md
   - Interpretation: interpretation.md
   - Workflow integration: workflow-integration.md
   - Validation: validation.md
   - Code walkthrough:
       - Overview: code-walkthrough/README.md
+      - v0.2.0: code-walkthrough/v0.2.0/README.md
       - v0.1.0a1:
           - Overview: code-walkthrough/v0.1.0a1/README.md
           - 00 — End-to-end execution map: code-walkthrough/v0.1.0a1/00-execution-map.md
