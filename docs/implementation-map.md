@@ -50,8 +50,12 @@ The implementation here describes **v0.2.0**. Separate independent records
 exist for [v0.1.0](https://github.com/RhysWhite/branchsnv-validation/tree/main/release_validation/v0.1.0)
 and [v0.2.0](https://github.com/RhysWhite/branchsnv-validation/tree/51471ce6220b329229971ae63e2d6ee3b03d9aca/release_validation/v0.2.0).
 The latter reproduces Experiments 01–06 and includes 540 conventional/transposed
-NEXUS-equivalence checks. Its results are verified; the v0.2.0 Zenodo deposit
-and scientific publication approval are pending. Experiment 07 remains separate.
+NEXUS-equivalence checks. The [v0.2.0 validation archive](https://doi.org/10.5281/zenodo.23518684)
+is public. The separate 150-scenario Experiment 07 evidence is frozen at
+[`2afa89f`](https://github.com/RhysWhite/branchsnv-validation/tree/2afa89f47815eac3b85b722c2fddd14d9c17f22e),
+with data in [Zenodo v0.3.0](https://doi.org/10.5281/zenodo.23684441).
+The supplementary S8 reproducibility archive remains a release candidate,
+not a published DOI.
 
 The historical [v0.1.0a1 code walkthrough](code-walkthrough/README.md) is
 preserved for reproducibility. Do not treat its individual source-line mapping

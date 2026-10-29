@@ -19,7 +19,10 @@ For exact frozen result paths, denominators and version boundaries, consult
 the [validation evidence index](https://github.com/RhysWhite/branchsnv-validation/blob/main/EVIDENCE_INDEX.md).
 The v0.2.0 parser extensions are not covered by the v0.1.0 archive;
 540 conventional/transposed NEXUS-equivalence analyses are instead retained in
-the new v0.2.0 record. Zenodo archival approval is pending.
+the [v0.2.0 reproduction and its public archive](https://doi.org/10.5281/zenodo.23518684).
+The frozen [Experiment 07](https://github.com/RhysWhite/branchsnv-validation/blob/main/docs/experiment07.md)
+is an additional, separately archived benchmarking study, not part of the
+Experiments 01–06 validation pass criteria.
 
 ## Production test suite
 

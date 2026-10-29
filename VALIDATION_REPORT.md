@@ -8,7 +8,9 @@
 A fresh six-experiment reproduction and independent retained-output audit
 passed for source commit `65eb791d9f1a202c3ca8816332a58c036794bd1f`.
 The [v0.2.0 evidence](https://github.com/RhysWhite/branchsnv-validation/tree/51471ce6220b329229971ae63e2d6ee3b03d9aca/release_validation/v0.2.0)
-is frozen locally; its Zenodo archive and final publication approval are pending.
+is preserved and [archived publicly](https://doi.org/10.5281/zenodo.23518684).
+Experiment 07 is a separate benchmark; see the
+[validation evidence index](https://github.com/RhysWhite/branchsnv-validation/blob/main/EVIDENCE_INDEX.md).
 
 The existing production `v0.2.0` tag resolves to `b63b6dbdde46162570dd0d17902e619467771624`,
 not the validated commit. The repository-level comparison reports no changes

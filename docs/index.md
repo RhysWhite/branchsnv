@@ -1,34 +1,36 @@
 # BRANCHSNV
 
-**BRANCHSNV v0.2.0 archival records:** [software (10.5281/zenodo.23518619)](https://doi.org/10.5281/zenodo.23518619) · [independent validation and reproduction (10.5281/zenodo.23518684)](https://doi.org/10.5281/zenodo.23518684).
+BRANCHSNV identifies **strict clade-exclusive nucleotide markers** and
+**parsimony-reconstructed substitutions on one selected branch** of a rooted
+bacterial phylogeny. These are different claims; see
+[Interpretation](interpretation.md) before reporting results.
 
-BRANCHSNV is a dependency-free Python command-line tool for interrogating one selected branch of a rooted bacterial phylogeny using a nucleotide NEXUS SNV matrix in conventional or transposed orientation.
+## Choose a starting point
 
-It reports two properties separately:
+| I want to… | Start here |
+|---|---|
+| Install and run the included example | [README: installation and quick start](https://github.com/RhysWhite/branchsnv#installation) |
+| Understand NEXUS, Newick or root selection | [Input formats](input-formats.md) and [branch selection](branch-selection.md) |
+| Interpret `results.tsv` accurately | [Interpretation](interpretation.md) and [algorithm](algorithm.md) |
+| Follow the Python code without prior developer experience | [v0.2.0 code walkthrough](code-walkthrough/v0.2.0/README.md) |
+| Put BRANCHSNV in a pipeline | [Workflow integration](workflow-integration.md) |
+| Inspect validation claims and reproduce evidence | [Validation strategy](validation.md) and [validation evidence index](https://github.com/RhysWhite/branchsnv-validation/blob/main/EVIDENCE_INDEX.md) |
+| Find related methods, publications and tools | [References and related tools](references.md) |
 
-- **strict clade-exclusive nucleotide markers**, defined from the observed tip states; and
-- **substitutions reconstructed on the focal edge**, evaluated across all globally optimal equal-cost Sankoff parsimony reconstructions.
+BRANCHSNV does **not** call variants, infer a phylogeny, filter recombination,
+or demonstrate an evolutionary or phenotypic cause. Those are upstream or
+separate analyses.
 
-This separation prevents clade exclusivity from being treated as equivalent to substitution placement on a branch.
+## Version and archives
 
-## Installation
+The source tree documents **v0.2.0** (conventional and transposed NEXUS).
+The package-installation instructions deliberately distinguish the historical
+v0.1.0 packages from the source-identical v0.2.0 reproduction.
 
-See the [version-pinned installation instructions](https://github.com/RhysWhite/branchsnv/blob/v0.2.0/README.md#installation).
-They distinguish the independently validated v0.1.0 release from this
-v0.2.0 source checkout, which adds conventional NEXUS support. See the
-[validation record](validation.md) for the scope of independent testing.
+- [v0.2.0 software archive](https://doi.org/10.5281/zenodo.23518619)
+- [v0.2.0 independent validation archive](https://doi.org/10.5281/zenodo.23518684)
+- [Experiment 07 benchmark v0.3.0](https://doi.org/10.5281/zenodo.23684441) — separate from Experiments 01–06
+- [Historical v0.1.0a1 code walkthrough](code-walkthrough/v0.1.0a1/README.md)
 
-## Start here
-
-- [Input formats](input-formats.md): accepted NEXUS and Newick input scope.
-- [Branch selection](branch-selection.md): exact descendant sets, MRCA selection, deterministic branch IDs, and rooting.
-- [Algorithm](algorithm.md): clade-exclusivity logic and equal-cost Sankoff reconstruction.
-- [Interpretation](interpretation.md): what BRANCHSNV results do and do not imply.
-- [Workflow integration](workflow-integration.md): use in reproducible pipelines.
-- [Validation](validation.md): production testing and independent publication validation.
-- [Current implementation map](implementation-map.md): concise source-to-algorithm navigation for v0.2.0.
-- [Historical code walkthrough](code-walkthrough/README.md): source-specific documentation for v0.1.0a1 only.
-
-## Citation and archival record
-
-The stable software release is archived in Zenodo with DOI **10.5281/zenodo.21919038**. Citation metadata are also provided in `CITATION.cff` in the source repository.
+Version-specific citation details are in
+[`CITATION.cff`](https://github.com/RhysWhite/branchsnv/blob/main/CITATION.cff).

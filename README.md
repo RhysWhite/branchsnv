@@ -38,7 +38,7 @@
     <img src="https://img.shields.io/badge/bio.tools-branchsnv-005a9c.svg" alt="bio.tools">
   </a>
   <a href="https://doi.org/10.5281/zenodo.23518619">
-    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23518619.svg" alt="v0.1.0 software archive DOI">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23518619.svg" alt="v0.2.0 software archive DOI">
   </a>
 </p>
 
@@ -91,11 +91,13 @@ can recur elsewhere and therefore not be clade-exclusive.
 
 BRANCHSNV requires Python 3.10 or later.
 
-The package-installation examples below use **v0.1.0**. The current
-**v0.2.0** source adds conventional NEXUS input and has a separately
-reproduced [v0.2.0 validation record](https://github.com/RhysWhite/branchsnv-validation/tree/51471ce6220b329229971ae63e2d6ee3b03d9aca/release_validation/v0.2.0).
-That record is verified but not yet deposited in Zenodo. The v0.1.0
-software and validation DOIs below identify the earlier archived releases.
+The PyPI and Bioconda commands below are pinned to the historical **v0.1.0**
+package; they are not instructions for installing v0.2.0. **v0.2.0** additionally
+supports conventional NEXUS matrices. To use the version reproduced in the
+independent October 2026 validation, install its exact Git commit below.
+Version-specific [v0.2.0 software and validation archives](https://doi.org/10.5281/zenodo.23518684)
+are published; see the [evidence index](https://github.com/RhysWhite/branchsnv-validation/blob/main/EVIDENCE_INDEX.md)
+for the associated Git identities and verification commands.
 
 Install the independently validated v0.1.0 release from Bioconda:
 
@@ -339,61 +341,24 @@ interpretive cautions.
 
 ## Validation and reproducibility
 
-Production tests and publication validation are deliberately separated.
+The [production test suite](docs/validation.md) checks parsing, branch selection,
+parsimony, output determinism and packaging. In this source snapshot,
+`PYTHONPATH=src python -m unittest discover -s tests -q` runs **80 tests**.
 
-The **production repository** contains the unit, regression, determinism,
-packaging, and bundled-example checks used during development. The current test
-suite contains **80 tests** and is run across Python 3.10–3.14, with additional
-macOS and Windows jobs in GitHub Actions.
+Independent results and their source identities belong to
+[`branchsnv-validation`](https://github.com/RhysWhite/branchsnv-validation).
+Start at its [evidence index](https://github.com/RhysWhite/branchsnv-validation/blob/main/EVIDENCE_INDEX.md),
+not a floating branch or a headline number. It distinguishes:
 
-The independent **publication-validation repository** is maintained separately
-at [RhysWhite/branchsnv-validation](https://github.com/RhysWhite/branchsnv-validation).
-The stable v0.1.0 validation release is archived at
-https://doi.org/10.5281/zenodo.21919067.
-It preserves two version-pinned records:
-
-- the historical publication snapshot for **BRANCHSNV v0.1.0a1**; and
-- a separate stable-release validation record for **BRANCHSNV v0.1.0** under
-  `release_validation/v0.1.0/`.
-
-Both records support the same deterministic analytical headline results:
-
-| Validation layer | Result |
+| Scope | Evidence and limitation |
 |---|---|
-| Independent exhaustive oracle | 128,881/128,881 exact comparisons across seven topology–edge settings |
-| Deliberately faulted implementations | 10/10 fault classes detected across 280,216 fault–challenge comparisons |
-| SNPPar comparison | 877/877 BRANCHSNV-unambiguous substitutions matched SNPPar; 66 additional SNPPar events were retained as placement-ambiguous |
-| Published focal branches | 46/46 published SNVs reproduced across MRSA AK3, MRSA ST97, and *E. coli* ST131/OXA-48 |
-| Complete-phylogeny empirical analysis | 31,644 informative comparisons across five phylogenies; 827 (2.61%) fell outside the fixed-exclusive/unambiguous-substitution intersection |
-| Scalability | 39/39 measured end-to-end command-line runs completed |
+| Experiments 01–06 | Exhaustive oracle, fault challenges, SNPPar concordance, scalability, published focal branches and complete-phylogeny empirical analysis; independently reproduced for v0.2.0 and [archived](https://doi.org/10.5281/zenodo.23518684). |
+| Experiment 07 | Separate 150-scenario comparison with a [frozen publication snapshot](https://github.com/RhysWhite/branchsnv-validation/tree/2afa89f47815eac3b85b722c2fddd14d9c17f22e) and [v0.3.0 data archive](https://doi.org/10.5281/zenodo.23684441). This is *not* part of the six-experiment v0.2.0 release validation. |
+| Supplementary Table S8 | Post-hoc attribution and identifiability analyses; source and outputs were reproduced byte-for-byte in a release-candidate replay. The separate S8 supplement **has not yet received a public DOI**. Do not cite it as deposited. |
 
-The stable v0.1.0 run was generated against production commit
-`71b055bdbd8e00ee63afda136b88892aee0062f8` using validation-framework commit
-`cfb07389191540ca57c9e822b254c279ab903f36`. It verified the production
-source identity for all 13 Python source files, the validation-script identity,
-the Experiments 01–06 pass criteria, and exact reproduction of the deterministic
-analytical outputs in the canonical scientific snapshot. Experiment 04
-performance measurements are retained as environment-specific observations.
+Exact result tables, reproducibility steps and the limits of each comparison
+are documented in the [validation evidence index](https://github.com/RhysWhite/branchsnv-validation/blob/main/EVIDENCE_INDEX.md).
 
-At validation-repository commit `35a0794ddd9782355e1e06dd95bd10e1cde4c735`,
-the v0.1.0 record is checksum-gated and checked in CI. The historical snapshot
-remains separately verifiable with `verify_publication_snapshot.py`.
-
-The **v0.2.0** reproduction passed the same six-experiment protocol against
-production commit `65eb791d9f1a202c3ca8816332a58c036794bd1f` using
-validation framework `3c64a1d367253ddcaef06c2f07012f347606358e`.
-The [frozen v0.2.0 record](https://github.com/RhysWhite/branchsnv-validation/tree/51471ce6220b329229971ae63e2d6ee3b03d9aca/release_validation/v0.2.0)
-retains 47 results, input and source checksums, the execution environment,
-and a 540-analysis conventional/transposed NEXUS equivalence audit.
-The results passed retained-data verification; Zenodo deposition and final
-publication approval remain pending. Experiment 07 is not part of this record.
-
-The older [`validation/ak3/`](validation/ak3/) directory in this repository is
-retained as a checksum-gated working-data regression recipe. It is **not** the
-authoritative independent validation record.
-
-See [`VALIDATION_REPORT.md`](VALIDATION_REPORT.md) and
-[`docs/validation.md`](docs/validation.md) for details.
 
 ## Documentation
 
@@ -415,7 +380,9 @@ and installable releases are available from
 | Scientific interpretation | [`docs/interpretation.md`](docs/interpretation.md) |
 | Validation design | [`docs/validation.md`](docs/validation.md) |
 | Shell and Snakemake integration | [`docs/workflow-integration.md`](docs/workflow-integration.md) |
-| Annotated source-code walkthrough (`v0.1.0a1`) | [`docs/code-walkthrough/v0.1.0a1/README.md`](docs/code-walkthrough/v0.1.0a1/README.md) |
+| Beginner-friendly v0.2.0 source walkthrough | [`docs/code-walkthrough/v0.2.0/README.md`](docs/code-walkthrough/v0.2.0/README.md) |
+| Historical v0.1.0a1 line-by-line walkthrough | [`docs/code-walkthrough/v0.1.0a1/README.md`](docs/code-walkthrough/v0.1.0a1/README.md) |
+| Related research and tools | [`docs/references.md`](docs/references.md) |
 | Contributing | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | Release history | [`CHANGELOG.md`](CHANGELOG.md) |
 
@@ -450,9 +417,11 @@ BRANCHSNV was developed and is maintained by [Rhys White](https://github.com/Rhy
 
 Citation metadata are provided in [`CITATION.cff`](CITATION.cff).
 
-BRANCHSNV v0.1.0 is permanently archived at
-https://doi.org/10.5281/zenodo.21919038. The corresponding publication-validation
-release is archived separately at https://doi.org/10.5281/zenodo.21919067.
+For **v0.2.0**, cite the [software archive](https://doi.org/10.5281/zenodo.23518619)
+and, when relevant, the [independent validation archive](https://doi.org/10.5281/zenodo.23518684).
+Historical v0.1.0 records remain available as
+[software](https://doi.org/10.5281/zenodo.21919038) and
+[validation](https://doi.org/10.5281/zenodo.21919067).
 
 ## Licence
 
